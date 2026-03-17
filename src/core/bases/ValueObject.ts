@@ -15,5 +15,5 @@ export abstract class ValueObject<T> {
     return String(this._value);
   }
 
-  abstract validate(value: T): boolean;
+  protected abstract validate(value: T): boolean;
 }
