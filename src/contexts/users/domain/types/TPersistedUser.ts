@@ -1,11 +1,8 @@
+import type { CreateUserRequest } from "@contexts/users/application/DTOs/createUserDTO";
 import type { Role } from "../valueObjects/Role";
 
-export type TPersistedUser = {
+export type TPersistedUser = CreateUserRequest & {
   id: string;
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
   createdAt: Date;
   updatedAt: Date;
   role: Role;
