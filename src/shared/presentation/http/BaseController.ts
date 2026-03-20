@@ -1,3 +1,5 @@
+import type { BaseError } from "@core/errors/BaseError";
+import { errorToHttp } from "../helpers/error/errorToHttp";
 import type { Controller } from "../protocols/Controller";
 import type { HttpRequest } from "./HttpRequest";
 import type { HttpResponse } from "./HttpResponse";
@@ -34,12 +36,7 @@ export abstract class BaseController<T = any> implements Controller<T> {
     };
   }
 
-  //TODO: Refactor
-  //NOTE: add errorToHttp()
-  protected fail(error: Error): HttpResponse {
-    return {
-      statusCode: 500,
-      data: error.message,
-    };
+  protected fail(error: BaseError): HttpResponse {
+    return errorToHttp(error);
   }
 }
