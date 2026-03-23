@@ -22,7 +22,7 @@ export class CreateUserUseCase implements ICreateUser {
     if (user.isErr) {
       return Result.err(user.error);
     }
-    this.repository.create(request);
+    this.repository.create(user.value);
     return Result.ok(user.value);
   }
 }
