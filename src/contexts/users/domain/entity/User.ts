@@ -1,4 +1,4 @@
-import type { Hasher } from "@core/contracts/Hasher";
+import type { HashServices } from "@core/contracts/HashServices";
 import { Result } from "@core/result/Result";
 import { Email } from "@core/valueObjects/Email";
 import { Password } from "@core/valueObjects/Password";
@@ -18,7 +18,7 @@ export class User {
     readonly role: Role = "user",
   ) {}
 
-  public static async create(rawUser: TCreateUser, hasher: Hasher): Promise<Result<User>> {
+  public static async create(rawUser: TCreateUser, hasher: HashServices): Promise<Result<User>> {
     const password = await Password.create(rawUser.password, hasher);
     const email = Email.create(rawUser.email);
 
