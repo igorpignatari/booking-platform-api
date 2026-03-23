@@ -18,6 +18,9 @@ export const env = {
   appName: optional("APP_NAME", "my-backend"),
   databaseUrl: required("DATABASE_URL"),
   jwtSecret: required("JWT_SECRET"),
+  jwtRefreshSecret: required("JWT_REFRESH_SECRET"),
+  jwtExpiresIn: optional("JWT_EXPIRES_IN", "15m"),
+  jwtRefreshExpiresIn: optional("JWT_REFRESH_EXPIRES_IN", "7d"),
   logLevel: optional("LOG_LEVEL", "debug"),
 } as const;
 
