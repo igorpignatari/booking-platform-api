@@ -1,6 +1,6 @@
-import type { Hasher } from "@core/contracts/Hasher";
+import type { HashServices } from "@core/contracts/HashServices";
 
-export class HashInMemory implements Hasher {
+export class HashInMemory implements HashServices {
   async hash(rawPassword: string): Promise<string> {
     return `hashed-${rawPassword}`;
   }

@@ -1,4 +1,3 @@
-import type { BaseError } from "@core/errors/BaseError";
 import { errorToHttp } from "../helpers/error/errorToHttp";
 import type { Controller } from "../protocols/Controller";
 import type { HttpRequest } from "./HttpRequest";
@@ -36,7 +35,7 @@ export abstract class BaseController<T = any> implements Controller<T> {
     };
   }
 
-  protected fail(error: BaseError): HttpResponse {
+  protected fail(error: any): HttpResponse {
     return errorToHttp(error);
   }
 }
