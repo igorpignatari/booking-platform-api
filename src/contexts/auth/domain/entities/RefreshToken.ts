@@ -1,7 +1,7 @@
 import type { TRefreshToken } from "../types/TRefreshToken";
 
 export class RefreshToken {
-  constructor(
+  private constructor(
     public readonly id: string,
     public readonly userId: string,
     public readonly token: string,
