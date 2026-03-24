@@ -4,7 +4,7 @@ import { AuthUserMapper } from "@contexts/auth/infra/database/mapper/AuthUserMap
 import type { UserRepository } from "@contexts/users/application/ports/output/UserRespository";
 import type { User } from "@contexts/users/domain/entity/User";
 import { Result } from "@core/result/Result";
-import type { UserRow } from "../dao/type/UserRow";
+import type { UserRow } from "../types/UserRow";
 
 export class UserRepositoryInMemory implements UserRepository, AuthUserRepository {
   private users: User[] = [];

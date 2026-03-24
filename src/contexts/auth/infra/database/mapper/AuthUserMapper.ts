@@ -1,5 +1,5 @@
 import { AuthUser } from "@contexts/auth/domain/entities/AuthUser";
-import type { UserRow } from "@contexts/users/infra/database/dao/type/UserRow";
+import type { UserRow } from "@contexts/users/infra/database/types/UserRow";
 
 export class AuthUserMapper {
   static toDomain(row: UserRow): AuthUser {

@@ -25,7 +25,6 @@ export class LoginUseCase implements ILogin {
       return Result.err(new Error("Invalid login"));
     }
 
-    console.log(isUser.value);
     const isPasswordValid = await this.hashService.compare(login.password, isUser.value.password);
 
     if (!isPasswordValid) {
