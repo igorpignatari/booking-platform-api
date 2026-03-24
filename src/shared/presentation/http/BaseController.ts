@@ -1,5 +1,6 @@
 import { errorToHttp } from "../helpers/error/errorToHttp";
 import type { Controller } from "../protocols/Controller";
+import type { Cookie } from "./Cookie";
 import type { HttpRequest } from "./HttpRequest";
 import type { HttpResponse } from "./HttpResponse";
 
@@ -18,6 +19,14 @@ export abstract class BaseController<T = any> implements Controller<T> {
     return {
       statusCode: 200,
       data,
+    };
+  }
+
+  protected okWithCookie<T>(data: T, cookie: Cookie): HttpResponse {
+    return {
+      statusCode: 200,
+      data,
+      cookies: [cookie],
     };
   }
 
