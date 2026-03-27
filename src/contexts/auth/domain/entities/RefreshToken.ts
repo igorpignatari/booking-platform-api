@@ -13,7 +13,7 @@ export class RefreshToken {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + data.expiresInDays);
 
-    return new RefreshToken(crypto.randomUUID(), data.userId, data.token, expiresAt, new Date());
+    return new RefreshToken(crypto.randomUUID(), data.userId, data.token, new Date(), expiresAt);
   }
 
   isExpired(): boolean {
