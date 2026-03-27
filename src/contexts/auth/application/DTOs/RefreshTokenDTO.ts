@@ -1,3 +1,3 @@
-import type { TRefreshToken } from "@contexts/auth/domain/types/TRefreshToken";
+import type { AuthResponse } from "./AuthResponseDTO";
 
-export type RefreshTokenDTO = Omit<TRefreshToken, "expiresInDays" | "userId">;
+export type RefreshTokenRequest = Omit<AuthResponse, "accessToken">;
