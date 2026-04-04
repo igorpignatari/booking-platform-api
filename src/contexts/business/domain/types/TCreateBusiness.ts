@@ -11,9 +11,9 @@ export type TCreateBusiness = {
     state: string;
     country: string;
     zipCode: string;
-    complement?: string;
+    complement?: string | undefined;
   };
   category: string;
-  email?: string;
-  taxId?: string;
+  email?: string | undefined;
+  taxId?: string | undefined;
 };
