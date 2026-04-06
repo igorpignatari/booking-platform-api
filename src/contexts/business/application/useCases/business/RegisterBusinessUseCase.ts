@@ -7,7 +7,7 @@ import type { BusinessRepository } from "../../ports/output/BusinessRepository";
 export class RegisterBusinessUseCase implements IRegisterBusiness {
   constructor(private readonly businessRepository: BusinessRepository) {}
 
-  async execute(request: RegisterBusinessRequest): Promise<Result<void>> {
+  async execute(request: RegisterBusinessRequest): Promise<Result<Business>> {
     const business = Business.create({
       userId: request.userId,
       name: request.name,
@@ -27,6 +27,6 @@ export class RegisterBusinessUseCase implements IRegisterBusiness {
     if (isSaved.isErr) {
       return Promise.resolve(Result.err(isSaved.error));
     }
-    return Promise.resolve(Result.ok(undefined));
+    return Promise.resolve(Result.ok(business.value));
   }
 }
