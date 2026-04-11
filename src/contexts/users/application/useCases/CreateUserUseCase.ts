@@ -1,4 +1,5 @@
 import { User } from "@contexts/users/domain/entity/User";
+import { UserErrors } from "@contexts/users/domain/errors/UserErrors";
 import type { HashServices } from "@core/contracts/HashServices";
 import { Result } from "@core/result/Result";
 import type { CreateUserRequest } from "../DTOs/createUserDTO";
@@ -14,7 +15,11 @@ export class CreateUserUseCase implements ICreateUser {
     const isEmailTaken = await this.repository.findByEmail(request.email);
 
     if (isEmailTaken.isErr) {
-      return Result.err(new Error("Email already taken!"));
+      return Result.err(isEmailTaken.error);
+    }
+
+    if (isEmailTaken.value === null) {
+      return Result.err(UserErrors.USER_ALREADY_EXISTS.create("User already exists"));
     }
 
     const user = await User.create(request, this.hasher);
@@ -22,7 +27,10 @@ export class CreateUserUseCase implements ICreateUser {
     if (user.isErr) {
       return Result.err(user.error);
     }
-    this.repository.create(user.value);
+    const isSaved = await this.repository.create(user.value);
+    if (isSaved.isErr) {
+      return Result.err(isSaved.error);
+    }
     return Result.ok(user.value);
   }
 }
