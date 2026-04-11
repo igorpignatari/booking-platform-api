@@ -1,5 +1,6 @@
 import { ValueObject } from "@core/bases/ValueObject";
 import { Result } from "@core/result/Result";
+import { BusinessErrors } from "../errors/BusinessErrors";
 
 export const BusinessCategories = {
   RESTAURANT: "restaurant",
@@ -21,8 +22,8 @@ export class Category extends ValueObject<Categories> {
   }
 
   static create(value: string): Result<Category> {
-    if (!this.isValid(value)) {
-      return Result.err(new Error(`Invalid category: ${value}`));
+    if (!Category.isValid(value)) {
+      return Result.err(BusinessErrors.CATEGORY_INVALID.create(`Invalid category: ${value}`));
     }
 
     return Result.ok(new Category(value as Categories));
@@ -30,7 +31,7 @@ export class Category extends ValueObject<Categories> {
 
   static createFromKey(key: string): Result<Category> {
     if (!(key in BusinessCategories)) {
-      return Result.err(new Error(`Invalid category key: ${key}`));
+      return Result.err(BusinessErrors.CATEGORY_INVALID.create(`Invalid category: ${key}`));
     }
 
     const value = BusinessCategories[key as keyof typeof BusinessCategories];

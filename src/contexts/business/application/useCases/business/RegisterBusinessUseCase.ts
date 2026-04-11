@@ -20,13 +20,13 @@ export class RegisterBusinessUseCase implements IRegisterBusiness {
     });
 
     if (business.isErr) {
-      return Promise.resolve(Result.err(business.error));
+      return Result.err(business.error);
     }
 
     const isSaved = await this.businessRepository.save(business.value);
     if (isSaved.isErr) {
-      return Promise.resolve(Result.err(isSaved.error));
+      return Result.err(isSaved.error);
     }
-    return Promise.resolve(Result.ok(business.value));
+    return Result.ok(business.value);
   }
 }

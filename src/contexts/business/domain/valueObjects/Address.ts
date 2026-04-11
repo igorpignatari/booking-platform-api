@@ -1,5 +1,6 @@
 import { ValueObject } from "@core/bases/ValueObject";
 import { Result } from "@core/result/Result";
+import { BusinessErrors } from "../errors/BusinessErrors";
 import type { TCreateAddress } from "../types/TCreateAddress";
 
 //TODO: Fix this class, create new vos for each field, improve validation
@@ -9,8 +10,8 @@ export class Address extends ValueObject<TCreateAddress> {
   }
 
   static create(address: TCreateAddress): Result<Address> {
-    if (!this.validate(address)) {
-      return Result.err(new Error("Invalid address"));
+    if (!Address.validate(address)) {
+      return Result.err(BusinessErrors.ADDRESS_INVALID.create("Invalid address"));
     }
     return Result.ok(new Address(address));
   }
