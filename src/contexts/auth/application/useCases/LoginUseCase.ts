@@ -1,5 +1,6 @@
 import type { JWTServices } from "@contexts/auth/domain/contracts/JWTServices";
 import { RefreshToken } from "@contexts/auth/domain/entities/RefreshToken";
+import { AuthErrors } from "@contexts/auth/domain/errors/AuthErrors";
 import type { TRefreshToken } from "@contexts/auth/domain/types/TRefreshToken";
 import type { HashServices } from "@core/contracts/HashServices";
 import { Result } from "@core/result/Result";
@@ -25,13 +26,13 @@ export class LoginUseCase implements ILogin {
     }
 
     if (isUser.value === null) {
-      return Result.err(new Error("Invalid login"));
+      return Result.err(AuthErrors.USER_LOGIN_ERROR.create("Email or password is invalid"));
     }
 
     const isPasswordValid = await this.hashService.compare(login.password, isUser.value.password);
 
     if (!isPasswordValid) {
-      return Result.err(new Error("Invalid login"));
+      return Result.err(AuthErrors.USER_LOGIN_ERROR.create("Email or password is invalid"));
     }
 
     const accessToken = this.jwtService.generateAccessToken({

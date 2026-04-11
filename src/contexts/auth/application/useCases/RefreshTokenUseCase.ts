@@ -1,5 +1,6 @@
 import type { JWTServices } from "@contexts/auth/domain/contracts/JWTServices";
 import { RefreshToken } from "@contexts/auth/domain/entities/RefreshToken";
+import { AuthErrors } from "@contexts/auth/domain/errors/AuthErrors";
 import type { TRefreshToken } from "@contexts/auth/domain/types/TRefreshToken";
 import { Result } from "@core/result/Result";
 import { env } from "@shared/env/env";
@@ -21,10 +22,10 @@ export class RefreshTokenUseCase implements IRefreshToken {
       return Result.err(isValidToken.error);
     }
     if (isValidToken.value === null) {
-      return Result.err(new Error("Invalid refresh token"));
+      return Result.err(AuthErrors.USER_UNAUTHORIZED_ERROR.create("Token is invalid"));
     }
     if (isValidToken.value.isExpired()) {
-      return Result.err(new Error("Expired refresh token"));
+      return Result.err(AuthErrors.USER_UNAUTHORIZED_ERROR.create("Token is expired"));
     }
 
     const isDelete = await this.authRepository.delete(refreshToken);
