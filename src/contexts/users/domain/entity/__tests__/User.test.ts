@@ -1,7 +1,7 @@
 import { User } from "@contexts/users/domain/entity/User";
-import { HashInMemory } from "@shared/crypto/HashInMemory";
+import { HashInMemory } from "@shared/__tests__/inMemory/HashInMemory";
 
-describe("User entity", () => {
+describe("User entity test", () => {
   it("should create a valid user", async () => {
     const hasher = new HashInMemory();
 
