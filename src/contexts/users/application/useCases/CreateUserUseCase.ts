@@ -18,7 +18,7 @@ export class CreateUserUseCase implements ICreateUser {
       return Result.err(isEmailTaken.error);
     }
 
-    if (isEmailTaken.value === null) {
+    if (isEmailTaken.value !== null) {
       return Result.err(UserErrors.USER_ALREADY_EXISTS.create("User already exists"));
     }
 
