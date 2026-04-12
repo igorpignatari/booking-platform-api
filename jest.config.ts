@@ -3,7 +3,7 @@ import type { Config } from "jest";
 const config: Config = {
   rootDir: ".",
   testEnvironment: "node",
-  testMatch: ["**/tests/**/*.test.ts", "**/*.spec.ts"],
+  testMatch: ["<rootDir>/src/**/__tests__/**/*.test.ts", "<rootDir>/src/**/*.spec.ts"],
   transform: {
     "^.+\\.(t|j)sx?$": [
       "@swc/jest",
@@ -24,12 +24,7 @@ const config: Config = {
     "^@shared/(.*)$": "<rootDir>/src/shared/$1",
     "^@contexts/(.*)$": "<rootDir>/src/contexts/$1",
   },
-  collectCoverageFrom: [
-    "src/**/*.ts",
-    "!src/**/*.d.ts",
-    "!src/main.ts",
-    "!src/**/*.errors.ts",
-  ],
+  collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/main.ts", "!src/**/*.errors.ts"],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html"],
   clearMocks: true,

@@ -1,28 +1,136 @@
-import { CreateUserUseCase } from "@contexts/users/application/useCases/CreateUserUseCase";
-import { User } from "@contexts/users/domain/entity/User";
-import { UserRepositoryInMemory } from "@contexts/users/infra/database/repository/UserRepositoryInMemory";
-import { HashInMemory } from "@shared/crypto/HashInMemory";
+import { makeUser } from "@contexts/users/__tests__/factories/makeUser";
+import { makeCreateUserUseCase } from "@contexts/users/__tests__/factories/useCase/makeCreateUserUseCase";
+import { makeMockUserRepository } from "@contexts/users/__tests__/mocks/makeMockUserRepository";
+import { Result } from "@core/result/Result";
 
-describe("Create user use case", () => {
-  it("should create a user", async () => {
-    const userRepo = new UserRepositoryInMemory();
-    const hasher = new HashInMemory();
-    const useCase = new CreateUserUseCase(userRepo, hasher);
+describe("Create user use Case test", () => {
+  describe("success with mock", () => {
+    it("should create a user when email is not taken", async () => {
+      // Arrange
+      const userRepository = makeMockUserRepository();
+      userRepository.findByEmail.mockResolvedValue(Result.ok(null));
+      userRepository.create.mockResolvedValue(Result.ok(null));
 
-    const user = await useCase.execute({
-      name: "joe doe",
-      email: "joe_doe@example.com",
-      password: "@Password123",
-      phone: "+1234567890",
+      const { useCase } = makeCreateUserUseCase({ userRepository });
+      const input = makeUser();
+
+      // Act
+      const result = await useCase.execute(input);
+
+      // Assert
+      expect(result.isOk).toBe(true);
+      expect(result.value).toBeDefined();
+
+      // Assert
+      expect(userRepository.findByEmail).toHaveBeenCalledTimes(1);
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(input.email);
+      expect(userRepository.create).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("failure with mock", () => {
+    it("should return error when email is already taken", async () => {
+      // Arrange
+      const userRepository = makeMockUserRepository();
+      const existingUser = { id: "1", email: "joe_doe@example.com" } as any;
+      userRepository.findByEmail.mockResolvedValue(Result.ok(existingUser));
+
+      const { useCase } = makeCreateUserUseCase({ userRepository });
+      const input = makeUser();
+
+      // Act
+      const result = await useCase.execute(input);
+
+      // Assert
+      expect(result.isErr).toBe(true);
+      expect(userRepository.create).not.toHaveBeenCalled();
     });
 
-    expect(user.isOk).toBe(true);
-    expect(user.value).toBeInstanceOf(User);
-    expect(user.value.id).toBeDefined();
-    expect(user.value.name).toBe("joe doe");
-    expect(user.value.email.getValue()).toBe("joe_doe@example.com");
-    expect(user.value.password.getValue()).toBe("hashed-@Password123");
-    expect(user.value.phone).toBe("+1234567890");
-    expect(user.value.role).toBe("user");
+    it("should not call create when findByEmail fails", async () => {
+      // Arrange
+      const userRepository = makeMockUserRepository();
+      userRepository.findByEmail.mockResolvedValue(Result.err(new Error("DB error")));
+
+      const { useCase } = makeCreateUserUseCase({ userRepository });
+
+      // Act
+      const result = await useCase.execute(makeUser());
+
+      // Assert
+      expect(result.isErr).toBe(true);
+      expect(userRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("success with InMemory", () => {
+    it("should create a user successfully", async () => {
+      // Arrange
+      const { useCase } = makeCreateUserUseCase();
+      const input = makeUser();
+
+      // Act
+      const result = await useCase.execute(input);
+
+      // Assert
+      expect(result.isOk).toBe(true);
+      expect(result.value).toBeDefined();
+      expect(result.value.name).toBe(input.name);
+      expect(result.value.phone).toBe(input.phone);
+      expect(result.value.email.getValue()).toBe(input.email);
+      expect(result.value.id).toBeDefined();
+    });
+
+    it("should hash the password", async () => {
+      // Arrange
+      const { useCase } = makeCreateUserUseCase();
+      const input = makeUser();
+
+      // Act
+      const result = await useCase.execute(input);
+
+      // Assert
+      expect(result.value.password.getValue()).not.toBe(input.password);
+      expect(result.value.password.getValue()).toBe(`hashed-${input.password}`);
+    });
+  });
+
+  describe("failure with InMemory", () => {
+    it("should return error when email is already taken", async () => {
+      // Arrange
+      const { useCase } = makeCreateUserUseCase();
+      const input = makeUser();
+
+      await useCase.execute(input);
+
+      // Act
+      const result = await useCase.execute(input);
+
+      // Assert
+      expect(result.isErr).toBe(true);
+    });
+
+    it("should return error when email is invalid", async () => {
+      // Arrange
+      const { useCase } = makeCreateUserUseCase();
+      const input = makeUser();
+
+      // Act
+      const result = await useCase.execute({ ...input, email: "invalid-email" });
+
+      // Assert
+      expect(result.isErr).toBe(true);
+    });
+
+    it("should return error when password is invalid", async () => {
+      // Arrange
+      const { useCase } = makeCreateUserUseCase();
+      const input = makeUser();
+
+      // Act
+      const result = await useCase.execute({ ...input, password: "weak" });
+
+      // Assert
+      expect(result.isErr).toBe(true);
+    });
   });
 });

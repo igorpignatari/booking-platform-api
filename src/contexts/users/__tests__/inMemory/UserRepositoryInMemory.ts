@@ -3,8 +3,8 @@ import type { AuthUser } from "@contexts/auth/domain/entities/AuthUser";
 import { AuthUserMapper } from "@contexts/auth/infra/database/mapper/AuthUserMapper";
 import type { UserRepository } from "@contexts/users/application/ports/output/UserRespository";
 import type { User } from "@contexts/users/domain/entity/User";
+import type { UserRow } from "@contexts/users/infra/database/types/UserRow";
 import { Result } from "@core/result/Result";
-import type { UserRow } from "../types/UserRow";
 
 export class UserRepositoryInMemory implements UserRepository, AuthUserRepository {
   private users: User[] = [];
