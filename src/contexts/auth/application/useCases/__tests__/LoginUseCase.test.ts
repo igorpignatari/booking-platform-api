@@ -3,7 +3,7 @@ import { makeLoginUseCase } from "@contexts/auth/__tests__/factories/useCase/mak
 import { AuthUser } from "@contexts/auth/domain/entities/AuthUser";
 import { Result } from "@core/result/Result";
 
-describe("LoginUseCase", () => {
+describe("Login use case", () => {
   describe("success", () => {
     it("should return accessToken and refreshToken", async () => {
       // Arrange

@@ -5,7 +5,7 @@ import { RefreshTokenUseCase } from "@contexts/auth/application/useCases/Refresh
 import { JWTServicesImpl } from "@contexts/auth/infra/jwt/JWTServicesImpl";
 import { Result } from "@core/result/Result";
 
-describe("RefreshTokenUseCase", () => {
+describe("Refresh token use case", () => {
   describe("success", () => {
     it("should return new accessToken and refreshToken", async () => {
       // Arrange
@@ -21,7 +21,7 @@ describe("RefreshTokenUseCase", () => {
       expect(result.isOk).toBe(true);
       expect(result.value.accessToken).toBeDefined();
       expect(result.value.refreshToken).toBeDefined();
-      expect(result.value.refreshToken).not.toBe(refreshToken.token); // token rotacionado
+      expect(result.value.refreshToken).not.toBe(refreshToken.token);
     });
 
     it("should delete the old token and save a new one", async () => {
