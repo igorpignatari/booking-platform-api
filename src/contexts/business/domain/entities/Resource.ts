@@ -13,7 +13,7 @@ export class Resource {
   ) {}
 
   static create(resource: TCreateResource): Result<Resource> {
-    if (!resource.name && !resource.businessId) {
+    if (!resource.name || !resource.businessId) {
       return Result.err(new Error("Invalid resource"));
     }
     return Result.ok(

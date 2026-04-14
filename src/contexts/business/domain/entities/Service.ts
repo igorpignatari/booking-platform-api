@@ -14,7 +14,7 @@ export class Service {
   ) {}
 
   static create(service: TCreateService): Result<Service> {
-    if (!service.name && !service.resourceId && !service.duration) {
+    if (!service.name || !service.resourceId || !service.duration) {
       return Result.err(new Error("Invalid service"));
     }
     return Result.ok(
