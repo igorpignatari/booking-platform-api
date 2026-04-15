@@ -7,7 +7,7 @@ export class Result<T> {
 
   // ── Factories ────────────────────────────────────────────────────────────────
 
-  static ok<T>(value: T): Result<T> {
+  static ok<T = void>(value?: T): Result<T> {
     return new Result<T>(true, value);
   }
 
@@ -113,13 +113,8 @@ export class Result<T> {
     fn4: (result: Result<C>) => Result<D>,
     fn5: (result: Result<D>) => Result<E>,
   ): Result<E>;
-  pipe(
-    ...fns: Array<(result: Result<unknown>) => Result<unknown>>
-  ): Result<unknown> {
-    return fns.reduce(
-      (acc: Result<unknown>, fn) => fn(acc),
-      this as Result<unknown>,
-    );
+  pipe(...fns: Array<(result: Result<unknown>) => Result<unknown>>): Result<unknown> {
+    return fns.reduce((acc: Result<unknown>, fn) => fn(acc), this as Result<unknown>);
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -142,9 +137,7 @@ export class Result<T> {
     return Result.ok(await fn(this._value as T));
   }
 
-  async asyncFlatMap<U>(
-    fn: (value: T) => Promise<Result<U>>,
-  ): Promise<Result<U>> {
+  async asyncFlatMap<U>(fn: (value: T) => Promise<Result<U>>): Promise<Result<U>> {
     if (this.isErr) return Result.err(this._error);
     return fn(this._value as T);
   }
