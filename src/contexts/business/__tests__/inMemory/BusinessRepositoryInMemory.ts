@@ -8,4 +8,9 @@ export class BusinessRepositoryInMemory implements BusinessRepository {
     this.businesses.push(business);
     return Promise.resolve(Result.ok(undefined));
   }
+
+  findById(id: string): Promise<Result<Business | null>> {
+    const business = this.businesses.find((x) => x.id === id);
+    return Promise.resolve(Result.ok(business ? business : null));
+  }
 }

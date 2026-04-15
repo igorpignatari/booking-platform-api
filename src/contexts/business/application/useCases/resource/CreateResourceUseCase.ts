@@ -3,12 +3,16 @@ import { BusinessErrors } from "@contexts/business/domain/errors/BusinessErrors"
 import { Result } from "@core/result/Result";
 import type { CreateResourceRequest } from "../../DTOs/CreateResourceDTO";
 import type { ICreateResource } from "../../ports/input/ICreateResource";
+import type { BusinessRepository } from "../../ports/output/BusinessRepository";
 import type { ResourceRepository } from "../../ports/output/ResourceRepository";
 
 export class CreateResourceUseCase implements ICreateResource {
-  constructor(private readonly resourceRepository: ResourceRepository) {}
+  constructor(
+    private readonly resourceRepository: ResourceRepository,
+    private readonly businessRepository: BusinessRepository,
+  ) {}
   async execute(request: CreateResourceRequest): Promise<Result<Resource>> {
-    const isBusinessExists = await this.resourceRepository.findBusinessById(request.businessId);
+    const isBusinessExists = await this.businessRepository.findById(request.businessId);
     if (isBusinessExists.isErr) {
       return Result.err(isBusinessExists.error);
     }
