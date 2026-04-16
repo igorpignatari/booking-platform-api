@@ -13,7 +13,6 @@ export class CreateServiceUseCase implements ICreateService {
   ) {}
 
   async execute(request: CreateServiceRequest): Promise<Result<Service>> {
-    console.log(request.resourceId);
     const isResourceExist = await this.resourceRepository.findById(request.resourceId);
     if (isResourceExist.isErr) {
       return Result.err(isResourceExist.error);

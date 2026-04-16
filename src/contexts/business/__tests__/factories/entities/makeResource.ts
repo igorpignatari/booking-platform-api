@@ -2,6 +2,6 @@ import type { TCreateResource } from "@contexts/business/domain/types/TCreateRes
 
 export const makeResource = (overrides?: Partial<TCreateResource>): TCreateResource => ({
   businessId: "uuid-business",
-  name: "resource name",
+  name: "Resource Name",
   ...overrides,
 });
