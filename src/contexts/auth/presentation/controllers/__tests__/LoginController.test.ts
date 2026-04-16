@@ -1,8 +1,8 @@
-import { makeHttpRequest } from "@contexts/auth/__tests__/factories/controller/makeHttpRequest";
 import type { LoginRequest } from "@contexts/auth/application/DTOs/LoginDTO";
 import type { ILogin } from "@contexts/auth/application/ports/input/ILogin";
 import { LoginController } from "@contexts/auth/presentation/controllers/LoginController";
 import { Result } from "@core/result/Result";
+import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
 
 const makeUseCaseMock = (): jest.Mocked<ILogin> => ({ execute: jest.fn() });
 

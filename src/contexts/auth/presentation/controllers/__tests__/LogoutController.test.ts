@@ -1,8 +1,8 @@
-import { makeHttpRequest } from "@contexts/auth/__tests__/factories/controller/makeHttpRequest";
 import type { RefreshTokenRequest } from "@contexts/auth/application/DTOs/RefreshTokenDTO";
 import type { ILogout } from "@contexts/auth/application/ports/input/ILogout";
 import { LogoutController } from "@contexts/auth/presentation/controllers/LogoutController";
 import { Result } from "@core/result/Result";
+import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
 
 const makeUseCaseMock = (): jest.Mocked<ILogout> => ({ execute: jest.fn() });
 

@@ -1,8 +1,8 @@
-import { makeHttpRequest } from "@contexts/auth/__tests__/factories/controller/makeHttpRequest";
 import type { RefreshTokenRequest } from "@contexts/auth/application/DTOs/RefreshTokenDTO";
 import type { IRefreshToken } from "@contexts/auth/application/ports/input/IRefreshToken";
 import { RefreshTokenController } from "@contexts/auth/presentation/controllers/RefreshTokenController";
 import { Result } from "@core/result/Result";
+import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
 
 const makeUseCaseMock = (): jest.Mocked<IRefreshToken> => ({ execute: jest.fn() });
 

@@ -3,15 +3,7 @@ import type { CreateUserRequest } from "@contexts/users/application/DTOs/createU
 import type { ICreateUser } from "@contexts/users/application/ports/input/ICreateUser";
 import { CreateUserController } from "@contexts/users/presentation/controllers/CreateUserController";
 import { Result } from "@core/result/Result";
-import type { HttpRequest } from "@shared/presentation/http/HttpRequest";
-
-const makeHttpRequest = (body: CreateUserRequest): HttpRequest<CreateUserRequest> => ({
-  body,
-  params: null,
-  query: null,
-  correlationId: "test-correlation-id",
-  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
-});
+import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
 
 const makeUseCaseMock = (): jest.Mocked<ICreateUser> => ({
   execute: jest.fn(),
@@ -33,7 +25,7 @@ describe("CreateUserController", () => {
       const controller = new CreateUserController(useCase);
 
       // Act
-      const response = await controller.handle(makeHttpRequest(makeUser()));
+      const response = await controller.handle(makeHttpRequest<CreateUserRequest>(makeUser()));
 
       // Assert
       expect(response.statusCode).toBe(201);
@@ -55,7 +47,7 @@ describe("CreateUserController", () => {
       const input = makeUser();
 
       // Act
-      await controller.handle(makeHttpRequest(input));
+      await controller.handle(makeHttpRequest<CreateUserRequest>(input));
 
       // Assert
       expect(useCase.execute).toHaveBeenCalledTimes(1);
@@ -72,7 +64,7 @@ describe("CreateUserController", () => {
       const controller = new CreateUserController(useCase);
 
       // Act
-      const response = await controller.handle(makeHttpRequest(makeUser()));
+      const response = await controller.handle(makeHttpRequest<CreateUserRequest>(makeUser()));
 
       // Assert
       expect(response.statusCode).toBe(500);
@@ -86,7 +78,7 @@ describe("CreateUserController", () => {
       const controller = new CreateUserController(useCase);
 
       // Act
-      const response = await controller.handle(makeHttpRequest(makeUser()));
+      const response = await controller.handle(makeHttpRequest<CreateUserRequest>(makeUser()));
 
       // Assert
       expect(response.statusCode).toBe(500);

@@ -1,8 +1,8 @@
-import { makeHttpRequest } from "@contexts/auth/__tests__/factories/controller/makeHttpRequest";
 import type { LogoutRequest } from "@contexts/auth/application/DTOs/LogoutDTO";
 import type { ILogoutAllDevices } from "@contexts/auth/application/ports/input/ILogutAllDevices";
 import { LogoutAllDevicesController } from "@contexts/auth/presentation/controllers/LogoutAllDevicesController";
 import { Result } from "@core/result/Result";
+import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
 
 const makeUseCaseMock = (): jest.Mocked<ILogoutAllDevices> => ({ execute: jest.fn() });
 
