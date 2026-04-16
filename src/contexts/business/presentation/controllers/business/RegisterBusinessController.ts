@@ -3,8 +3,8 @@ import type { IRegisterBusiness } from "@contexts/business/application/ports/inp
 import { BaseController } from "@shared/presentation/http/BaseController";
 import type { HttpRequest } from "@shared/presentation/http/HttpRequest";
 import type { HttpResponse } from "@shared/presentation/http/HttpResponse";
-import type { RegisterBusinessViewModel } from "../presenters/RegisterBusinessViewModel";
-import { registerBusinessToHttp } from "../presenters/registerBusinessToHttp";
+import type { RegisterBusinessViewModel } from "../../presenters/RegisterBusinessViewModel";
+import { registerBusinessToHttp } from "../../presenters/registerBusinessToHttp";
 
 export class RegisterBusinessController extends BaseController {
   constructor(private readonly registerBusinessUseCase: IRegisterBusiness) {
