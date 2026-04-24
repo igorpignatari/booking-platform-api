@@ -1,21 +1,49 @@
-export class Result<T> {
+import type { BaseError } from "@core/errors/BaseError";
+
+export class Result<T, E = BaseError> {
   private constructor(
     private readonly _isOk: boolean,
     private readonly _value?: T,
-    private readonly _error?: unknown,
+    private readonly _error?: E,
   ) {}
 
-  // ── Factories ────────────────────────────────────────────────────────────────
+  // ---------- Factories ----------
 
-  static ok<T = void>(value?: T): Result<T> {
-    return new Result<T>(true, value);
+  static ok<T = void, E = BaseError>(value?: T): Result<T, E> {
+    return new Result<T, E>(true, value as T, undefined);
   }
 
-  static err<T = never>(error: unknown): Result<T> {
-    return new Result<T>(false, undefined, error);
+  static err<T = never, E = BaseError>(error: E): Result<T, E> {
+    return new Result<T, E>(false, undefined, error);
   }
 
-  // ── Getters ──────────────────────────────────────────────────────────────────
+  /**
+   * Combines multiple Results into a single Result.
+   * - If all are Ok, returns Ok with an array of values.
+   * - If any is Err, returns Err with an array of all errors.
+   *
+   * Typically used to aggregate validation errors of the same category.
+   */
+  static combine<T, E = BaseError>(results: Result<T, E>[]): Result<T[], E[]> {
+    const errors: E[] = [];
+    const values: T[] = [];
+
+    for (const result of results) {
+      if (result.isErr) {
+        errors.push(result.error);
+      } else {
+        values.push(result.value);
+      }
+    }
+
+    if (errors.length > 0) {
+      return Result.err<T[], E[]>(errors);
+    }
+
+    return Result.ok<T[], E[]>(values);
+  }
+
+  // ---------- Getters ----------
 
   get isOk(): boolean {
     return this._isOk;
@@ -32,95 +60,44 @@ export class Result<T> {
     return this._value as T;
   }
 
-  get error(): unknown {
+  get error(): E {
     if (this.isOk) {
       throw new Error("Cannot get error from a successful result");
     }
-    return this._error;
+    return this._error as E;
   }
 
-  // ── Combinators ──────────────────────────────────────────────────────────────
+  // ---------- Combinators ----------
 
-  static combine(results: Result<unknown>[]): Result<void> {
-    const errors: unknown[] = [];
-
-    for (const result of results) {
-      if (result.isErr) {
-        errors.push(result._error);
-      }
+  map<U>(fn: (value: T) => U): Result<U, E> {
+    if (this.isErr) {
+      return Result.err<U, E>(this._error as E);
     }
+    return Result.ok<U, E>(fn(this._value as T));
+  }
 
-    if (errors.length > 0) {
-      return Result.err(errors);
+  mapError<F>(fn: (error: E) => F): Result<T, F> {
+    if (this.isOk) {
+      return Result.ok<T, F>(this._value as T);
     }
-
-    return Result.ok(undefined);
+    return Result.err<T, F>(fn(this._error as E));
   }
 
-  // ── Transformations ──────────────────────────────────────────────────────────
-
-  map<U>(fn: (value: T) => U): Result<U> {
-    if (this.isErr) return Result.err(this._error);
-    return Result.ok(fn(this._value as T));
-  }
-
-  flatMap<U>(fn: (value: T) => Result<U>): Result<U> {
-    if (this.isErr) return Result.err(this._error);
+  flatMap<U, E2 = E>(fn: (value: T) => Result<U, E2>): Result<U, E | E2> {
+    if (this.isErr) {
+      return Result.err<U, E | E2>(this._error as E);
+    }
     return fn(this._value as T);
   }
 
-  mapError(fn: (error: unknown) => unknown): Result<T> {
-    if (this.isOk) return this;
-    return Result.err(fn(this._error));
+  fold<U>(onSuccess: (value: T) => U, onFailure: (error: E) => U): U {
+    return this.isOk ? onSuccess(this._value as T) : onFailure(this._error as E);
   }
 
-  fold<U>(onSuccess: (value: T) => U, onFailure: (error: unknown) => U): U {
-    return this.isOk ? onSuccess(this._value as T) : onFailure(this._error);
-  }
+  // ---------- Escape hatches ----------
 
-  // ── Pipe ─────────────────────────────────────────────────────────────────────
-  // Permite encadear transformações de forma fluente e type-safe.
-  // Cada função recebe o Result atual e retorna um novo Result.
-  //
-  // Exemplo:
-  //   Result.ok(1)
-  //     .pipe(
-  //       r => r.map(x => x + 1),
-  //       r => r.map(x => x * 2),
-  //     )
-  //   // Result.ok(4)
-
-  pipe<A>(fn1: (result: Result<T>) => Result<A>): Result<A>;
-  pipe<A, B>(
-    fn1: (result: Result<T>) => Result<A>,
-    fn2: (result: Result<A>) => Result<B>,
-  ): Result<B>;
-  pipe<A, B, C>(
-    fn1: (result: Result<T>) => Result<A>,
-    fn2: (result: Result<A>) => Result<B>,
-    fn3: (result: Result<B>) => Result<C>,
-  ): Result<C>;
-  pipe<A, B, C, D>(
-    fn1: (result: Result<T>) => Result<A>,
-    fn2: (result: Result<A>) => Result<B>,
-    fn3: (result: Result<B>) => Result<C>,
-    fn4: (result: Result<C>) => Result<D>,
-  ): Result<D>;
-  pipe<A, B, C, D, E>(
-    fn1: (result: Result<T>) => Result<A>,
-    fn2: (result: Result<A>) => Result<B>,
-    fn3: (result: Result<B>) => Result<C>,
-    fn4: (result: Result<C>) => Result<D>,
-    fn5: (result: Result<D>) => Result<E>,
-  ): Result<E>;
-  pipe(...fns: Array<(result: Result<unknown>) => Result<unknown>>): Result<unknown> {
-    return fns.reduce((acc: Result<unknown>, fn) => fn(acc), this as Result<unknown>);
-  }
-
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-
-  getOrElse(defaultValue: T): T {
-    return this.isOk ? (this._value as T) : defaultValue;
+  getOrElse(fallback: T): T {
+    return this.isOk ? (this._value as T) : fallback;
   }
 
   getOrThrow(): T {
@@ -128,17 +105,5 @@ export class Result<T> {
       throw this._error;
     }
     return this._value as T;
-  }
-
-  // ── Async ────────────────────────────────────────────────────────────────────
-
-  async asyncMap<U>(fn: (value: T) => Promise<U>): Promise<Result<U>> {
-    if (this.isErr) return Result.err(this._error);
-    return Result.ok(await fn(this._value as T));
-  }
-
-  async asyncFlatMap<U>(fn: (value: T) => Promise<Result<U>>): Promise<Result<U>> {
-    if (this.isErr) return Result.err(this._error);
-    return fn(this._value as T);
   }
 }
