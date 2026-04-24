@@ -3,6 +3,7 @@ import type { ILogout } from "@contexts/auth/application/ports/input/ILogout";
 import { LogoutController } from "@contexts/auth/presentation/controllers/LogoutController";
 import { Result } from "@core/result/Result";
 import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
+import { DBError } from "@shared/infra/errors/DBError";
 
 const makeUseCaseMock = (): jest.Mocked<ILogout> => ({ execute: jest.fn() });
 
@@ -50,7 +51,7 @@ describe("Logout controller", () => {
     it("should return 500 when use case returns error", async () => {
       //arrange
       const useCase = makeUseCaseMock();
-      useCase.execute.mockResolvedValue(Result.err(new Error("token not found")));
+      useCase.execute.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       //act
       const controller = new LogoutController(useCase);

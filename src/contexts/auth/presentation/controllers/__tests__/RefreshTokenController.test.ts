@@ -3,6 +3,7 @@ import type { IRefreshToken } from "@contexts/auth/application/ports/input/IRefr
 import { RefreshTokenController } from "@contexts/auth/presentation/controllers/RefreshTokenController";
 import { Result } from "@core/result/Result";
 import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
+import { DBError } from "@shared/infra/errors/DBError";
 
 const makeUseCaseMock = (): jest.Mocked<IRefreshToken> => ({ execute: jest.fn() });
 
@@ -56,7 +57,7 @@ describe("Refresh token controller", () => {
     it("should return 500 when token is invalid", async () => {
       //arrange
       const useCase = makeUseCaseMock();
-      useCase.execute.mockResolvedValue(Result.err(new Error("token invalid")));
+      useCase.execute.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       //act
       const controller = new RefreshTokenController(useCase);

@@ -3,6 +3,7 @@ import type { CreateResourceRequest } from "@contexts/business/application/DTOs/
 import type { ICreateResource } from "@contexts/business/application/ports/input/ICreateResource";
 import { Result } from "@core/result/Result";
 import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
+import { DBError } from "@shared/infra/errors/DBError";
 import { CreateResourceController } from "../../resource/CreateResourceController";
 
 const makeUseCase = (): jest.Mocked<ICreateResource> => ({
@@ -54,7 +55,7 @@ describe("Create resource controller", () => {
   describe("failure", () => {
     it("should return 500 when use case returns an error", async () => {
       const useCase = makeUseCase();
-      useCase.execute.mockResolvedValue(Result.err(new Error("something went wrong")));
+      useCase.execute.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       const controller = new CreateResourceController(useCase);
 

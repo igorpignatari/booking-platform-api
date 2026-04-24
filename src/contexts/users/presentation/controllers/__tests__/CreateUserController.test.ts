@@ -4,6 +4,7 @@ import type { ICreateUser } from "@contexts/users/application/ports/input/ICreat
 import { CreateUserController } from "@contexts/users/presentation/controllers/CreateUserController";
 import { Result } from "@core/result/Result";
 import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
+import { DBError } from "@shared/infra/errors/DBError";
 
 const makeUseCaseMock = (): jest.Mocked<ICreateUser> => ({
   execute: jest.fn(),
@@ -59,7 +60,7 @@ describe("CreateUserController", () => {
     it("should return 500 when use case returns an error", async () => {
       // Arrange
       const useCase = makeUseCaseMock();
-      useCase.execute.mockResolvedValue(Result.err(new Error("something went wrong")));
+      useCase.execute.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       const controller = new CreateUserController(useCase);
 

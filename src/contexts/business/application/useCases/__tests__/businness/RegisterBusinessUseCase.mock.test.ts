@@ -2,6 +2,7 @@ import { makeBusiness } from "@contexts/business/__tests__/factories/entities/ma
 import { makeRegisterBusinessUseCase } from "@contexts/business/__tests__/factories/useCase/business/makeRegisterBusinessUseCase";
 import { makeMockBusinessRepository } from "@contexts/business/__tests__/mocks/makeMockBusinessRepository";
 import { Result } from "@core/result/Result";
+import { DBError } from "@shared/infra/errors/DBError";
 
 describe("Register business use case mock", () => {
   describe("success", () => {
@@ -29,7 +30,7 @@ describe("Register business use case mock", () => {
     it("it should return error when save fails", async () => {
       const mockBusinessRepository = makeMockBusinessRepository();
 
-      mockBusinessRepository.save.mockResolvedValue(Result.err(new Error("DB error")));
+      mockBusinessRepository.save.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       const { useCase } = makeRegisterBusinessUseCase({
         businessRepository: mockBusinessRepository,

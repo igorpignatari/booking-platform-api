@@ -1,4 +1,5 @@
 import type { HashServices } from "@core/contracts/HashServices";
+import type { BaseError } from "@core/errors/BaseError";
 import { Result } from "@core/result/Result";
 import { Email } from "@core/valueObjects/Email";
 import { Password } from "@core/valueObjects/Password";
@@ -18,7 +19,10 @@ export class User {
     readonly role: Role = "user",
   ) {}
 
-  public static async create(rawUser: TCreateUser, hasher: HashServices): Promise<Result<User>> {
+  public static async create(
+    rawUser: TCreateUser,
+    hasher: HashServices,
+  ): Promise<Result<User, BaseError[]>> {
     const password = await Password.create(rawUser.password, hasher);
     const email = Email.create(rawUser.email);
 

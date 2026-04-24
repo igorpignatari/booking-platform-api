@@ -2,6 +2,7 @@ import { makeUser } from "@contexts/users/__tests__/factories/makeUser";
 import { makeCreateUserUseCase } from "@contexts/users/__tests__/factories/useCase/makeCreateUserUseCase";
 import { makeMockUserRepository } from "@contexts/users/__tests__/mocks/makeMockUserRepository";
 import { Result } from "@core/result/Result";
+import { DBError } from "@shared/infra/errors/DBError";
 
 describe("Create user use Case test", () => {
   describe("success with mock", () => {
@@ -49,7 +50,7 @@ describe("Create user use Case test", () => {
     it("should not call create when findByEmail fails", async () => {
       // Arrange
       const userRepository = makeMockUserRepository();
-      userRepository.findByEmail.mockResolvedValue(Result.err(new Error("DB error")));
+      userRepository.findByEmail.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       const { useCase } = makeCreateUserUseCase({ userRepository });
 

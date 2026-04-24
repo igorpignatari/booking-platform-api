@@ -3,6 +3,7 @@ import type { ILogin } from "@contexts/auth/application/ports/input/ILogin";
 import { LoginController } from "@contexts/auth/presentation/controllers/LoginController";
 import { Result } from "@core/result/Result";
 import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
+import { DBError } from "@shared/infra/errors/DBError";
 
 const makeUseCaseMock = (): jest.Mocked<ILogin> => ({ execute: jest.fn() });
 
@@ -57,7 +58,7 @@ describe("Login controller", () => {
     it("should return 500 when use case returns error", async () => {
       //arrange
       const useCase = makeUseCaseMock();
-      useCase.execute.mockResolvedValue(Result.err(new Error("invalid credentials")));
+      useCase.execute.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       //act
       const controller = new LoginController(useCase);

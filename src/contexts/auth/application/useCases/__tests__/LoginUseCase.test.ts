@@ -2,6 +2,7 @@ import { makeAuthUser } from "@contexts/auth/__tests__/factories/makeAuthUser";
 import { makeLoginUseCase } from "@contexts/auth/__tests__/factories/useCase/makeLoginUseCase";
 import { AuthUser } from "@contexts/auth/domain/entities/AuthUser";
 import { Result } from "@core/result/Result";
+import { DBError } from "@shared/infra/errors/DBError";
 
 describe("Login use case", () => {
   describe("success", () => {
@@ -58,7 +59,9 @@ describe("Login use case", () => {
     it("should return error when repository fails", async () => {
       // Arrange
       const { useCase, userRepository } = makeLoginUseCase();
-      userRepository.findByEmailForAuth.mockResolvedValue(Result.err(new Error("DB error")));
+      userRepository.findByEmailForAuth.mockResolvedValue(
+        Result.err(DBError.create("Internal error")),
+      );
 
       // Act
       const result = await useCase.execute({ email: "x@x.com", password: "any" });

@@ -3,6 +3,7 @@ import { makeCreateResourceUseCase } from "@contexts/business/__tests__/factorie
 import { makeMockBusinessRepository } from "@contexts/business/__tests__/mocks/makeMockBusinessRepository";
 import { makeMockResourceRepository } from "@contexts/business/__tests__/mocks/makeMockCreateResourceRepository";
 import { Result } from "@core/result/Result";
+import { DBError } from "@shared/infra/errors/DBError";
 
 describe("Create resource use case (mokc)", () => {
   describe("Sucess", () => {
@@ -41,7 +42,7 @@ describe("Create resource use case (mokc)", () => {
 
       const existingBusiness = { id: resource.businessId } as any;
 
-      resourceRepository.save.mockResolvedValue(Result.err(new Error("DB error")));
+      resourceRepository.save.mockResolvedValue(Result.err(DBError.create("Internal error")));
       resourceRepository.findById.mockResolvedValue(Result.ok(null));
       businessRepository.save.mockResolvedValue(Result.ok());
       businessRepository.findById.mockResolvedValue(Result.ok(existingBusiness));

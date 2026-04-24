@@ -3,6 +3,7 @@ import type { RegisterBusinessRequest } from "@contexts/business/application/DTO
 import type { IRegisterBusiness } from "@contexts/business/application/ports/input/IRegisterBusiness";
 import { Result } from "@core/result/Result";
 import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
+import { DBError } from "@shared/infra/errors/DBError";
 import { RegisterBusinessController } from "../../business/RegisterBusinessController";
 
 const makeUseCaseMock = (): jest.Mocked<IRegisterBusiness> => ({
@@ -54,7 +55,7 @@ describe("Register business controller", () => {
   describe("failure", () => {
     it("should return 500 when use case returns an error", async () => {
       const useCase = makeUseCaseMock();
-      useCase.execute.mockResolvedValue(Result.err(new Error("something went wrong")));
+      useCase.execute.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       const controller = new RegisterBusinessController(useCase);
 

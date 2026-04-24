@@ -3,6 +3,7 @@ import type { ILogoutAllDevices } from "@contexts/auth/application/ports/input/I
 import { LogoutAllDevicesController } from "@contexts/auth/presentation/controllers/LogoutAllDevicesController";
 import { Result } from "@core/result/Result";
 import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
+import { DBError } from "@shared/infra/errors/DBError";
 
 const makeUseCaseMock = (): jest.Mocked<ILogoutAllDevices> => ({ execute: jest.fn() });
 
@@ -50,7 +51,7 @@ describe("LogoutAllDevicesController", () => {
     it("should return 500 when use case returns error", async () => {
       // Arrange
       const useCase = makeUseCaseMock();
-      useCase.execute.mockResolvedValue(Result.err(new Error("DB error")));
+      useCase.execute.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       // Act
       const controller = new LogoutAllDevicesController(useCase);

@@ -3,6 +3,7 @@ import type { CreateServiceRequest } from "@contexts/business/application/DTOs/C
 import type { ICreateService } from "@contexts/business/application/ports/input/ICreateService";
 import { Result } from "@core/result/Result";
 import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
+import { DBError } from "@shared/infra/errors/DBError";
 import { CreateServiceController } from "../../service/CreateServiceController";
 
 const makeUseCase = (): jest.Mocked<ICreateService> => ({
@@ -56,7 +57,7 @@ describe("Create service controller", () => {
   describe("failure", () => {
     it("should return 500 when use case returns an error", async () => {
       const useCase = makeUseCase();
-      useCase.execute.mockResolvedValue(Result.err(new Error("something went wrong")));
+      useCase.execute.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       const controller = new CreateServiceController(useCase);
 

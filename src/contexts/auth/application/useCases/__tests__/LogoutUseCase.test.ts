@@ -3,6 +3,7 @@ import { AuthRepositoryInMemory } from "@contexts/auth/__tests__/inMemory/AuthRe
 import { makeMockAuthRepository } from "@contexts/auth/__tests__/mocks/makeMockeAuthRepository";
 import { LogoutUseCase } from "@contexts/auth/application/useCases/LogoutUseCase";
 import { Result } from "@core/result/Result";
+import { DBError } from "@shared/infra/errors/DBError";
 
 describe("Logout use  case", () => {
   describe("success", () => {
@@ -29,7 +30,7 @@ describe("Logout use  case", () => {
     it("should return error when repository fails", async () => {
       //arrange
       const authRepository = makeMockAuthRepository();
-      authRepository.delete.mockResolvedValue(Result.err(new Error("DB error")));
+      authRepository.delete.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       //act
       const useCase = new LogoutUseCase(authRepository);

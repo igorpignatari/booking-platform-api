@@ -3,6 +3,7 @@ import { makeCreateServiceUseCase } from "@contexts/business/__tests__/factories
 import { makeMockResourceRepository } from "@contexts/business/__tests__/mocks/makeMockCreateResourceRepository";
 import { makeMockServiceRepository } from "@contexts/business/__tests__/mocks/makeMockCreateServiceRepository";
 import { Result } from "@core/result/Result";
+import { DBError } from "@shared/infra/errors/DBError";
 
 describe("Create service use case (mock)", () => {
   describe("Sucess", () => {
@@ -41,7 +42,7 @@ describe("Create service use case (mock)", () => {
       const service = makeService();
       const existingResource = { id: service.resourceId } as any;
 
-      serviceRepository.save.mockResolvedValue(Result.err(new Error("DB error")));
+      serviceRepository.save.mockResolvedValue(Result.err(DBError.create("Internal error")));
       resourceRepository.save.mockResolvedValue(Result.ok());
       resourceRepository.findById.mockResolvedValue(Result.ok(existingResource));
 

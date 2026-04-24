@@ -4,6 +4,7 @@ import { makeMockAuthRepository } from "@contexts/auth/__tests__/mocks/makeMocke
 import { RefreshTokenUseCase } from "@contexts/auth/application/useCases/RefreshTokenUseCase";
 import { JWTServicesImpl } from "@contexts/auth/infra/jwt/JWTServicesImpl";
 import { Result } from "@core/result/Result";
+import { DBError } from "@shared/infra/errors/DBError";
 
 describe("Refresh token use case", () => {
   describe("success", () => {
@@ -69,7 +70,9 @@ describe("Refresh token use case", () => {
     it("should return error when repository fails on findByRefreshToken", async () => {
       // Arrange
       const authRepository = makeMockAuthRepository();
-      authRepository.findByRefreshToken.mockResolvedValue(Result.err(new Error("DB error")));
+      authRepository.findByRefreshToken.mockResolvedValue(
+        Result.err(DBError.create("Internal error")),
+      );
 
       const useCase = new RefreshTokenUseCase(authRepository, new JWTServicesImpl());
 
@@ -86,7 +89,7 @@ describe("Refresh token use case", () => {
       const refreshToken = makeRefreshToken();
 
       authRepository.findByRefreshToken.mockResolvedValue(Result.ok(refreshToken));
-      authRepository.delete.mockResolvedValue(Result.err(new Error("DB error")));
+      authRepository.delete.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       const useCase = new RefreshTokenUseCase(authRepository, new JWTServicesImpl());
 
@@ -104,7 +107,7 @@ describe("Refresh token use case", () => {
 
       authRepository.findByRefreshToken.mockResolvedValue(Result.ok(refreshToken));
       authRepository.delete.mockResolvedValue(Result.ok(undefined));
-      authRepository.save.mockResolvedValue(Result.err(new Error("DB error")));
+      authRepository.save.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
       const useCase = new RefreshTokenUseCase(authRepository, new JWTServicesImpl());
 
