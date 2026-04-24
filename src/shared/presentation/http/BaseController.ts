@@ -1,3 +1,5 @@
+import type { BaseError } from "@core/errors/BaseError";
+import { errorMessageParser } from "../helpers/error/errorMessageParser";
 import { errorToHttp } from "../helpers/error/errorToHttp";
 import type { Controller } from "../protocols/Controller";
 import type { Cookie } from "./Cookie";
@@ -44,7 +46,7 @@ export abstract class BaseController<T = any> implements Controller<T> {
     };
   }
 
-  protected fail(error: any): HttpResponse {
-    return errorToHttp(error);
+  protected fail(error: BaseError): HttpResponse {
+    return errorToHttp(errorMessageParser(error));
   }
 }

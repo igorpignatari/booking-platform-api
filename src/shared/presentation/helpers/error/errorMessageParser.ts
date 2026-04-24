@@ -5,17 +5,9 @@ export type ParsedErrorMessage = {
   message: string;
 };
 
-/**
- * Assumes all errors share the same _tag.
- * This invariant is guaranteed because Result.combine is only used to
- * aggregate validation errors (same category).
- * Errors from other categories (Unauthorized, NotFound) use
- * early return and never reach combine.
- */
-export const errorMessageParser = (errors: BaseError[]): ParsedErrorMessage => {
-  const parsedErrors = errors.map((error) => `[${error.code}]: ${error.message}`);
+export const errorMessageParser = (errors: BaseError): ParsedErrorMessage => {
   return {
-    _tag: errors[0]?._tag || "DefaultError",
-    message: parsedErrors.join("\n"),
+    _tag: errors._tag,
+    message: `[${errors.code}]: ${errors.message}`,
   };
 };

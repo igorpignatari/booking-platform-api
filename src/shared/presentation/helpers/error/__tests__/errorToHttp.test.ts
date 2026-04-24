@@ -1,4 +1,5 @@
 import { CoreErrors } from "@core/errors/CoreErrors";
+import { AggregatedValidationError } from "@shared/domain/errors/AggregatedValidationError";
 import { DBError } from "@shared/infra/errors/DBError";
 import { errorMessageParser } from "../errorMessageParser";
 import { errorToHttp } from "../errorToHttp";
@@ -8,8 +9,9 @@ describe("errorToHttp", () => {
     const invalidEmailError = CoreErrors.INVALID_EMAIL.create("Invalid email");
     const invalidPasswordError = CoreErrors.INVALID_PASSWORD.create("Invalid password");
 
-    const error = errorToHttp(errorMessageParser([invalidEmailError, invalidPasswordError]));
-    console.log(error);
+    const error = errorToHttp(
+      errorMessageParser(new AggregatedValidationError([invalidEmailError, invalidPasswordError])),
+    );
     expect(error.statusCode).toBe(422);
   });
 
@@ -38,7 +40,7 @@ describe("errorToHttp", () => {
   });
 
   it("should return a 500 status code when default", () => {
-    const error = errorToHttp(errorMessageParser([DBError.create("Internal error")]));
+    const error = errorToHttp(errorMessageParser(DBError.create("Internal error")));
     expect(error.statusCode).toBe(500);
   });
 });
