@@ -1,4 +1,5 @@
 import { SimpleText } from "@core/bases/SimpleText";
+import { CoreErrors } from "@core/errors/CoreErrors";
 import { Result } from "@core/result/Result";
 
 export class Email extends SimpleText {
@@ -10,9 +11,11 @@ export class Email extends SimpleText {
     const regex = /^[\w.-]+@([\w-]+\.)+[\w-]{2,}$/i;
 
     if (!Email.validateSimpleText(email)) {
-      return Result.err(new Error("Invalid email"));
+      return Result.err(CoreErrors.INVALID_EMAIL.create("Invalid email"));
     }
-    return regex.test(email) ? Result.ok(new Email(email)) : Result.err(new Error("Invalid email"));
+    return regex.test(email)
+      ? Result.ok(new Email(email))
+      : Result.err(CoreErrors.INVALID_EMAIL.create("Invalid email"));
   }
 
   static createFromString(email: string): Email {
