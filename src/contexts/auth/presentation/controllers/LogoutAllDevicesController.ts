@@ -1,5 +1,5 @@
 import type { LogoutRequest } from "@contexts/auth/application/DTOs/LogoutDTO";
-import type { ILogoutAllDevices } from "@contexts/auth/application/ports/input/ILogutAllDevices";
+import type { ILogoutAllDevices } from "@contexts/auth/application/ports/input/ILogoutAllDevices";
 import { BaseController } from "@shared/presentation/http/BaseController";
 import type { HttpRequest } from "@shared/presentation/http/HttpRequest";
 import type { HttpResponse } from "@shared/presentation/http/HttpResponse";

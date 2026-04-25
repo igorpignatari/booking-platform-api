@@ -1,6 +1,6 @@
 import { makeRefreshToken } from "@contexts/auth/__tests__/factories/makeRefreshToken";
 import { AuthRepositoryInMemory } from "@contexts/auth/__tests__/inMemory/AuthRepositoryInMemory";
-import { makeMockAuthRepository } from "@contexts/auth/__tests__/mocks/makeMockeAuthRepository";
+import { makeMockAuthRepository } from "@contexts/auth/__tests__/mocks/makeMockAuthRepository";
 import { LogoutAllDevicesUseCase } from "@contexts/auth/application/useCases/LogoutAllDevicesUseCase";
 import { Result } from "@core/result/Result";
 import { DBError } from "@shared/infra/errors/DBError";

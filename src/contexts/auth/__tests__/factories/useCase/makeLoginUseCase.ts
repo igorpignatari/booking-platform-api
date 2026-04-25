@@ -2,7 +2,7 @@ import { LoginUseCase } from "@contexts/auth/application/useCases/LoginUseCase";
 import { JWTServicesImpl } from "@contexts/auth/infra/jwt/JWTServicesImpl";
 import { HashInMemory } from "@shared/__tests__/inMemory/HashInMemory";
 import { AuthRepositoryInMemory } from "../../inMemory/AuthRepositoryInMemory";
-import { makeMockAuthUserRepository } from "../../mocks/makeMockeAuthUserRepository";
+import { makeMockAuthUserRepository } from "../../mocks/makeMockAuthUserRepository";
 import type { SutTypeAuth } from "../types/SutAuth";
 
 export const makeLoginUseCase = (deps?: Partial<SutTypeAuth>) => {

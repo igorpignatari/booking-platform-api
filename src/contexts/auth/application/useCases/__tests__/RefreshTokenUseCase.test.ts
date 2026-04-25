@@ -1,6 +1,6 @@
 import { makeRefreshToken } from "@contexts/auth/__tests__/factories/makeRefreshToken";
 import { makeRefreshTokenUseCase } from "@contexts/auth/__tests__/factories/useCase/makeRefreshTokenUseCase";
-import { makeMockAuthRepository } from "@contexts/auth/__tests__/mocks/makeMockeAuthRepository";
+import { makeMockAuthRepository } from "@contexts/auth/__tests__/mocks/makeMockAuthRepository";
 import { RefreshTokenUseCase } from "@contexts/auth/application/useCases/RefreshTokenUseCase";
 import { JWTServicesImpl } from "@contexts/auth/infra/jwt/JWTServicesImpl";
 import { Result } from "@core/result/Result";

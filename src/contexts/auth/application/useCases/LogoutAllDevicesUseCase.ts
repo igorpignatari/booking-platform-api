@@ -1,6 +1,6 @@
 import { Result } from "@core/result/Result";
 import type { LogoutRequest } from "../DTOs/LogoutDTO";
-import type { ILogoutAllDevices } from "../ports/input/ILogutAllDevices";
+import type { ILogoutAllDevices } from "../ports/input/ILogoutAllDevices";
 import type { AuthRepository } from "../ports/output/AuthRepository";
 
 export class LogoutAllDevicesUseCase implements ILogoutAllDevices {

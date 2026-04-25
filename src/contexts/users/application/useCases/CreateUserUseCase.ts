@@ -5,7 +5,7 @@ import { Result } from "@core/result/Result";
 import { AggregatedValidationError } from "@shared/domain/errors/AggregatedValidationError";
 import type { CreateUserRequest } from "../DTOs/createUserDTO";
 import type { ICreateUser } from "../ports/input/ICreateUser";
-import type { UserRepository } from "../ports/output/UserRespository";
+import type { UserRepository } from "../ports/output/UserRepository";
 
 export class CreateUserUseCase implements ICreateUser {
   constructor(
