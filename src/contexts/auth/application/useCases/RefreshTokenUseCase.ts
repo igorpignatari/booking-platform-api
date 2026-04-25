@@ -4,6 +4,7 @@ import { AuthErrors } from "@contexts/auth/domain/errors/AuthErrors";
 import type { TRefreshToken } from "@contexts/auth/domain/types/TRefreshToken";
 import { Result } from "@core/result/Result";
 import { env } from "@shared/env/env";
+import { parseDuration } from "@shared/utils/parseDuration";
 import type { AuthResponse } from "../DTOs/AuthResponseDTO";
 import type { RefreshTokenRequest } from "../DTOs/RefreshTokenDTO";
 import type { IRefreshToken } from "../ports/input/IRefreshToken";
@@ -32,12 +33,15 @@ export class RefreshTokenUseCase implements IRefreshToken {
     if (isDelete.isErr) {
       return Result.err(isDelete.error);
     }
+
+    const expiresAt = new Date(Date.now() + parseDuration(env.jwtRefreshExpiresIn));
+
     const refreshTokenData: TRefreshToken = {
       userId: isValidToken.value.userId,
       token: this.jwtService.generateRefreshToken({
         id: isValidToken.value.userId,
       }),
-      expiresInDays: Number(env.jwtRefreshExpiresIn.split("")[0]),
+      expiresAt: expiresAt,
     };
 
     const newRefreshToken = RefreshToken.create(refreshTokenData);

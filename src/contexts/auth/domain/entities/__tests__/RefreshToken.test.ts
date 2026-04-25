@@ -6,7 +6,7 @@ describe("RefreshToken entity", () => {
       const token = RefreshToken.create({
         userId: "uuid-123",
         token: "any_token",
-        expiresInDays: 7,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
 
       expect(token.id).toBeDefined();
@@ -21,7 +21,7 @@ describe("RefreshToken entity", () => {
       const token = RefreshToken.create({
         userId: "uuid-123",
         token: "any_token",
-        expiresInDays: 7,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
       const after = new Date();
 
@@ -36,8 +36,16 @@ describe("RefreshToken entity", () => {
     });
 
     it("should generate unique ids", () => {
-      const t1 = RefreshToken.create({ userId: "uuid-123", token: "token-1", expiresInDays: 7 });
-      const t2 = RefreshToken.create({ userId: "uuid-123", token: "token-2", expiresInDays: 7 });
+      const t1 = RefreshToken.create({
+        userId: "uuid-123",
+        token: "token-1",
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      });
+      const t2 = RefreshToken.create({
+        userId: "uuid-123",
+        token: "token-2",
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      });
 
       expect(t1.id).not.toBe(t2.id);
     });
@@ -48,7 +56,7 @@ describe("RefreshToken entity", () => {
       const token = RefreshToken.create({
         userId: "uuid-123",
         token: "any_token",
-        expiresInDays: 7,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
 
       expect(token.isExpired()).toBe(false);
@@ -58,7 +66,7 @@ describe("RefreshToken entity", () => {
       const token = RefreshToken.create({
         userId: "uuid-123",
         token: "any_token",
-        expiresInDays: -1,
+        expiresAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
       });
 
       expect(token.isExpired()).toBe(true);

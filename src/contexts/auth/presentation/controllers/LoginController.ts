@@ -1,8 +1,10 @@
 import type { LoginRequest } from "@contexts/auth/application/DTOs/LoginDTO";
 import type { ILogin } from "@contexts/auth/application/ports/input/ILogin";
+import { env } from "@shared/env/env";
 import { BaseController } from "@shared/presentation/http/BaseController";
 import type { HttpRequest } from "@shared/presentation/http/HttpRequest";
 import type { HttpResponse } from "@shared/presentation/http/HttpResponse";
+import { parseDuration } from "@shared/utils/parseDuration";
 
 export class LoginController extends BaseController {
   constructor(private readonly loginUseCase: ILogin) {
@@ -22,7 +24,7 @@ export class LoginController extends BaseController {
           httpOnly: true,
           secure: true,
           sameSite: "strict",
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: parseDuration(env.jwtRefreshExpiresIn),
         }),
       (error) => {
         httpRequest.logger.warn("Business error", {

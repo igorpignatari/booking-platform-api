@@ -3,10 +3,10 @@ import { RefreshToken } from "@contexts/auth/domain/entities/RefreshToken";
 export const makeRefreshToken = (overrides?: {
   userId?: string;
   token?: string;
-  expiresInDays?: number;
+  expiresAt?: Date;
 }) =>
   RefreshToken.create({
     userId: overrides?.userId ?? "uuid-123",
     token: overrides?.token ?? "valid-refresh-token",
-    expiresInDays: overrides?.expiresInDays ?? 7,
+    expiresAt: overrides?.expiresAt ?? new Date(Date.now() + 1000 * 60 * 60 * 24),
   });

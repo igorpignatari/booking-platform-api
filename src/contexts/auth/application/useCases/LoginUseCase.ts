@@ -5,6 +5,7 @@ import type { TRefreshToken } from "@contexts/auth/domain/types/TRefreshToken";
 import type { HashServices } from "@core/contracts/HashServices";
 import { Result } from "@core/result/Result";
 import { env } from "@shared/env/env";
+import { parseDuration } from "@shared/utils/parseDuration";
 import type { AuthResponse } from "../DTOs/AuthResponseDTO";
 import type { LoginRequest } from "../DTOs/LoginDTO";
 import type { ILogin } from "../ports/input/ILogin";
@@ -39,12 +40,14 @@ export class LoginUseCase implements ILogin {
       id: isUser.value.id,
     });
 
+    const expiresAt = new Date(Date.now() + parseDuration(env.jwtRefreshExpiresIn));
+
     const refreshTokenData: TRefreshToken = {
       userId: isUser.value.id,
       token: this.jwtService.generateRefreshToken({
         id: isUser.value.id,
       }),
-      expiresInDays: Number(env.jwtRefreshExpiresIn.split("")[0]),
+      expiresAt: expiresAt,
     };
 
     const refreshToken = RefreshToken.create(refreshTokenData);

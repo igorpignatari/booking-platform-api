@@ -10,10 +10,13 @@ export class RefreshToken {
   ) {}
 
   static create(data: TRefreshToken): RefreshToken {
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + data.expiresInDays);
-
-    return new RefreshToken(crypto.randomUUID(), data.userId, data.token, new Date(), expiresAt);
+    return new RefreshToken(
+      crypto.randomUUID(),
+      data.userId,
+      data.token,
+      new Date(),
+      data.expiresAt,
+    );
   }
 
   isExpired(): boolean {

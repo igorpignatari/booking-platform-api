@@ -56,7 +56,9 @@ describe("Refresh token use case", () => {
     it("should return error when token is expired", async () => {
       // Arrange
       const { useCase, authRepository } = makeRefreshTokenUseCase();
-      const expiredToken = makeRefreshToken({ expiresInDays: -1 }); // já expirado
+      const expiredToken = makeRefreshToken({
+        expiresAt: new Date(Date.now() - 1000 * 60 * 60 * 7),
+      });
 
       await authRepository.save(expiredToken);
 

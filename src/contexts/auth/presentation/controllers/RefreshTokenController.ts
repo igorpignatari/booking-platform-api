@@ -1,8 +1,10 @@
 import type { RefreshTokenRequest } from "@contexts/auth/application/DTOs/RefreshTokenDTO";
 import type { IRefreshToken } from "@contexts/auth/application/ports/input/IRefreshToken";
+import { env } from "@shared/env/env";
 import { BaseController } from "@shared/presentation/http/BaseController";
 import type { HttpRequest } from "@shared/presentation/http/HttpRequest";
 import type { HttpResponse } from "@shared/presentation/http/HttpResponse";
+import { parseDuration } from "@shared/utils/parseDuration";
 
 export class RefreshTokenController extends BaseController {
   constructor(private readonly refreshTokenUseCase: IRefreshToken) {
@@ -22,7 +24,7 @@ export class RefreshTokenController extends BaseController {
           httpOnly: true,
           secure: true,
           sameSite: "strict",
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: parseDuration(env.jwtRefreshExpiresIn),
         }),
       (error) => {
         httpRequest.logger.warn("Business error", {
