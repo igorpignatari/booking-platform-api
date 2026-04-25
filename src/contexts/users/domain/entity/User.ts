@@ -45,8 +45,8 @@ export class User {
     return new User(
       persistentUser.id,
       persistentUser.name,
-      Email.createFromString(persistentUser.email),
-      Password.createFromString(persistentUser.password),
+      Email.createFromPersisted(persistentUser.email),
+      Password.createFromPersisted(persistentUser.password),
       persistentUser.phone,
       persistentUser.createdAt,
       persistentUser.updatedAt,

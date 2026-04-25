@@ -18,7 +18,7 @@ export class Email extends SimpleText {
       : Result.err(CoreErrors.INVALID_EMAIL.create("Invalid email"));
   }
 
-  static createFromString(email: string): Email {
+  static createFromPersisted(email: string): Email {
     return new Email(email);
   }
 }

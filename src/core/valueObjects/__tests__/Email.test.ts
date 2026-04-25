@@ -8,7 +8,9 @@ describe("Email value object", () => {
     });
 
     it("should  create from string", () => {
-      expect(Email.createFromString("joe_doe@example.com").getValue()).toBe("joe_doe@example.com");
+      expect(Email.createFromPersisted("joe_doe@example.com").getValue()).toBe(
+        "joe_doe@example.com",
+      );
     });
   });
 

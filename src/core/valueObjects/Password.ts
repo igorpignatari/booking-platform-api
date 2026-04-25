@@ -4,6 +4,10 @@ import { CoreErrors } from "@core/errors/CoreErrors";
 import { Result } from "@core/result/Result";
 
 export class Password extends SimpleText {
+  private constructor(hashedPassword: string) {
+    super(hashedPassword);
+  }
+
   static async create(rawPassword: string, hasher: HashServices): Promise<Result<Password>> {
     const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
     if (!Password.validateSimpleText(rawPassword)) {
@@ -21,7 +25,7 @@ export class Password extends SimpleText {
         );
   }
 
-  static createFromString(hashedPassword: string): Password {
+  static createFromPersisted(hashedPassword: string): Password {
     return new Password(hashedPassword);
   }
 

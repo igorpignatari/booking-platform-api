@@ -12,7 +12,7 @@ describe("Password value object", () => {
     });
 
     it("should  create from string", async () => {
-      expect(Password.createFromString("hashed-@Password123").getValue()).toBe(
+      expect(Password.createFromPersisted("hashed-@Password123").getValue()).toBe(
         "hashed-@Password123",
       );
     });
