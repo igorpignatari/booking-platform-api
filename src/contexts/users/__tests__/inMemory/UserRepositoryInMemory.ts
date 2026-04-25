@@ -1,7 +1,7 @@
 import type { AuthUserRepository } from "@contexts/auth/application/ports/output/AuthUserRepository";
 import type { AuthUser } from "@contexts/auth/domain/entities/AuthUser";
 import { AuthUserMapper } from "@contexts/auth/infra/database/mapper/AuthUserMapper";
-import type { UserRepository } from "@contexts/users/application/ports/output/UserRespository";
+import type { UserRepository } from "@contexts/users/application/ports/output/UserRepository";
 import type { User } from "@contexts/users/domain/entity/User";
 import type { UserRow } from "@contexts/users/infra/database/types/UserRow";
 import { Result } from "@core/result/Result";
