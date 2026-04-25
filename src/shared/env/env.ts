@@ -1,27 +1,57 @@
 import "dotenv/config";
+import { z } from "zod";
 
-function required(key: string): string {
-  const value = process.env[key];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-  return value;
-}
+const durationSchema = z.string().regex(/^\d+(ms|s|m|h|d|w|y)$/, {
+  message: "Must be a duration like '15m', '7d', '1h', '500ms'",
+});
 
-function optional(key: string, fallback: string): string {
-  return process.env[key] ?? fallback;
+const envSchema = z.object({
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+
+  PORT: z.coerce.number().int().positive().default(3000),
+
+  APP_NAME: z.string().min(1).default("my-backend"),
+
+  DATABASE_URL: z.string().url(),
+
+  JWT_SECRET: z.string().min(32, {
+    message: "JWT_SECRET must be at least 32 characters long",
+  }),
+  JWT_REFRESH_SECRET: z.string().min(32, {
+    message: "JWT_REFRESH_SECRET must be at least 32 characters long",
+  }),
+
+  JWT_EXPIRES_IN: durationSchema.default("15m"),
+  JWT_REFRESH_EXPIRES_IN: durationSchema.default("7d"),
+
+  LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("debug"),
+});
+
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  const formatted = parsed.error.issues
+    .map((issue) => `  • ${issue.path.join(".")}: ${issue.message}`)
+    .join("\n");
+
+  process.stderr.write(`\n❌ Invalid environment variables:\n${formatted}\n\n`);
+  process.exit(1);
 }
 
 export const env = {
-  nodeEnv: optional("NODE_ENV", "development"),
-  port: Number(optional("PORT", "3000")),
-  appName: optional("APP_NAME", "my-backend"),
-  databaseUrl: required("DATABASE_URL"),
-  jwtSecret: required("JWT_SECRET"),
-  jwtRefreshSecret: required("JWT_REFRESH_SECRET"),
-  jwtExpiresIn: optional("JWT_EXPIRES_IN", "15m"),
-  jwtRefreshExpiresIn: optional("JWT_REFRESH_EXPIRES_IN", "7d"),
-  logLevel: optional("LOG_LEVEL", "debug"),
+  nodeEnv: parsed.data.NODE_ENV,
+  port: parsed.data.PORT,
+  appName: parsed.data.APP_NAME,
+  databaseUrl: parsed.data.DATABASE_URL,
+  jwtSecret: parsed.data.JWT_SECRET,
+  jwtRefreshSecret: parsed.data.JWT_REFRESH_SECRET,
+  jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
+  jwtRefreshExpiresIn: parsed.data.JWT_REFRESH_EXPIRES_IN,
+  logLevel: parsed.data.LOG_LEVEL,
 } as const;
 
 export type Env = typeof env;
+
+export const isProduction = env.nodeEnv === "production";
+export const isTest = env.nodeEnv === "test";
+export const isDevelopment = env.nodeEnv === "development";
