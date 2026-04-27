@@ -4,7 +4,7 @@ export interface HttpRequest<TBody = any, TParams = any, TQuery = any> {
   body: TBody;
   params: TParams;
   query: TQuery;
-  headers?: Record<string, string>;
+  headers?: Record<string, string | string[] | undefined>;
   cookies?: Record<string, string>;
 
   correlationId: string;

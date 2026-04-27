@@ -5,5 +5,5 @@ import { makeUsersModule } from "src/main/factories/users/makeUsersModule";
 export const usersModule = makeUsersModule(dependencies);
 
 export const registerUsersRoutes = async (adapter: HttpAdapter) => {
-  adapter.regitser("post", "/users", usersModule.createUserController, dependencies.logger, []);
+  adapter.register("post", "/users", usersModule.createUserController, dependencies.logger, []);
 };

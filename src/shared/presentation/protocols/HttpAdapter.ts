@@ -6,14 +6,13 @@ import type { Middleware } from "./Middleware";
 
 export interface HttpAdapter {
   httpRequestMapper(req: unknown, logger: ILogger): HttpRequest;
-
-  regitser(
+  register(
     method: Method,
     path: string,
     controller: Controller,
     logger: ILogger,
     middlewares: Middleware[],
   ): void;
-
   listen(port: number, logger: ILogger): Promise<void>;
+  close(): Promise<void>;
 }

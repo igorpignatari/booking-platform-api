@@ -9,6 +9,8 @@ import express, { type Express, type Request, type Response } from "express";
 
 export class HttpExpressAdapter implements HttpAdapter {
   private readonly app: Express;
+  private server?: import("http").Server;
+
   constructor() {
     this.app = express();
     this.app.use(express.json());
@@ -31,7 +33,7 @@ export class HttpExpressAdapter implements HttpAdapter {
     };
   }
 
-  regitser(
+  register(
     method: Method,
     path: string,
     controller: Controller,
@@ -41,7 +43,7 @@ export class HttpExpressAdapter implements HttpAdapter {
     this.app[method](path, async (req: Request, res: Response) => {
       const request = this.httpRequestMapper(req, logger);
 
-      if (middlewares) {
+      if (middlewares.length > 0) {
         for (const middleware of middlewares) {
           const result = await middleware.handle(request);
           if (result) {
@@ -56,6 +58,19 @@ export class HttpExpressAdapter implements HttpAdapter {
   }
 
   async listen(port: number, logger: ILogger): Promise<void> {
-    this.app.listen(port, () => logger.info(`Server is running on port ${port}`));
+    return new Promise((resolve, reject) => {
+      this.server = this.app.listen(port, () => {
+        logger.info("Server is listening", { port });
+        resolve();
+      });
+      this.server.on("error", reject);
+    });
+  }
+
+  async close(): Promise<void> {
+    if (!this.server) return;
+    return new Promise((resolve, reject) => {
+      this.server?.close((err) => (err ? reject(err) : resolve()));
+    });
   }
 }
