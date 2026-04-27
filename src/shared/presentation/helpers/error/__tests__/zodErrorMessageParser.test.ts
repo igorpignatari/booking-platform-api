@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { zodErrorMessageParser } from "../../zodErrorMessageParser";
+import { zodErrorMessageParser } from "../zodErrorMessageParser";
 
 const fakeValidationSchema = z.object({
   email: z.email("Invalid email"),
