@@ -1,6 +1,6 @@
 import type { ILogger } from "@core/contracts/ILogger";
 
-export interface HttpRequest<TBody = any, TParams = any, TQuery = any> {
+export interface HttpRequest<TBody = unknown, TParams = unknown, TQuery = unknown> {
   body: TBody;
   params: TParams;
   query: TQuery;
