@@ -1,20 +1,34 @@
 import type { Database } from "@shared/application/contracts/Database";
 import type { IDatabase, ITask } from "pg-promise";
-import { DB_CONNECTION } from "../connections/PgPromiseConnection";
+
+type PgConnection = IDatabase<unknown> | ITask<unknown>;
 
 export class PgPromiseAdapter implements Database {
-  constructor(private readonly connection: IDatabase<any> | ITask<any> = DB_CONNECTION) {}
+  constructor(private readonly connection: PgConnection) {}
 
-  async query<T = any>(query: string, params?: any[]): Promise<T[]> {
-    return this.connection.query(query, params);
+  query<T>(sql: string, params?: unknown[]): Promise<T[]> {
+    return this.connection.query(sql, params);
   }
-  async one<T = any>(query: string, params?: any[]): Promise<T> {
-    return this.connection.one(query, params);
+
+  one<T>(sql: string, params?: unknown[]): Promise<T> {
+    return this.connection.one(sql, params);
   }
-  async none(query: string, params?: any[]): Promise<any> {
-    return this.connection.none(query, params);
+
+  oneOrNone<T>(sql: string, params?: unknown[]): Promise<T | null> {
+    return this.connection.oneOrNone(sql, params);
   }
-  async oneOrNone<T = any>(query: string, params?: any[]): Promise<T | null> {
-    return this.connection.oneOrNone(query, params);
+
+  async none(sql: string, params?: unknown[]): Promise<void> {
+    await this.connection.none(sql, params);
+  }
+
+  tx<T>(work: (trx: Database) => Promise<T>): Promise<T> {
+    if ("tx" in this.connection) {
+      return this.connection.tx(async (t) => {
+        const trxAdapter = new PgPromiseAdapter(t);
+        return work(trxAdapter);
+      });
+    }
+    return work(this);
   }
 }

@@ -1,6 +1,19 @@
-import { env } from "@shared/env/env";
-import pgPromise from "pg-promise";
+import pgPromise, { type IDatabase } from "pg-promise";
 
 export const pgp = pgPromise();
 
-export const DB_CONNECTION = pgp(env.databaseUrl);
+let connection: IDatabase<unknown> | null = null;
+
+export function getDbConnection(databaseUrl: string): IDatabase<unknown> {
+  if (!connection) {
+    connection = pgp(databaseUrl);
+  }
+  return connection;
+}
+
+export async function closeDbConnection(): Promise<void> {
+  if (connection) {
+    await connection.$pool.end();
+    connection = null;
+  }
+}
