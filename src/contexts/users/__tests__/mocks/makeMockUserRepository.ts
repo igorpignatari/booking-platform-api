@@ -1,4 +1,4 @@
-import type { UserRepository } from "@contexts/users/application/ports/output/UserRespository";
+import type { UserRepository } from "@contexts/users/application/ports/output/UserRepository";
 
 export const makeMockUserRepository = (): jest.Mocked<UserRepository> => ({
   create: jest.fn(),

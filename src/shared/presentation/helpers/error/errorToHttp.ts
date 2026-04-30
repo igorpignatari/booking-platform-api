@@ -15,6 +15,12 @@ export const errorToHttp = (error: ParsedErrorMessage): HttpResponse<string> => 
         data: error.message,
       };
     }
+    case "ConflictError": {
+      return {
+        statusCode: 409,
+        data: error.message,
+      };
+    }
     case "UnauthorizedError": {
       return {
         statusCode: 401,

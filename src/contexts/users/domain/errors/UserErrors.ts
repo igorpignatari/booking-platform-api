@@ -1,4 +1,4 @@
-import { NotFoundError } from "@shared/errors/httpErrors";
+import { ConflictError, NotFoundError, ValidationError } from "@shared/errors/httpErrors";
 
 class UserNotFoundError extends NotFoundError {
   private constructor(message: string) {
@@ -10,7 +10,7 @@ class UserNotFoundError extends NotFoundError {
   }
 }
 
-class UserAlreadyExistsError extends NotFoundError {
+class UserAlreadyExistsError extends ConflictError {
   private constructor(message: string) {
     super(message, "USER_ALREADY_EXISTS");
   }
@@ -20,7 +20,18 @@ class UserAlreadyExistsError extends NotFoundError {
   }
 }
 
+class RoleInvalidError extends ValidationError {
+  private constructor(message: string) {
+    super(message, "ROLE_INVALID");
+  }
+
+  static create(message: string): RoleInvalidError {
+    return new RoleInvalidError(message);
+  }
+}
+
 export const UserErrors = {
   USER_NOT_FOUND: UserNotFoundError,
   USER_ALREADY_EXISTS: UserAlreadyExistsError,
+  ROLE_INVALID: RoleInvalidError,
 } as const;

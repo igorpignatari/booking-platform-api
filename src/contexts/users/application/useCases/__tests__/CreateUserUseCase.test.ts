@@ -10,7 +10,7 @@ describe("Create user use Case test", () => {
       // Arrange
       const userRepository = makeMockUserRepository();
       userRepository.findByEmail.mockResolvedValue(Result.ok(null));
-      userRepository.create.mockResolvedValue(Result.ok(null));
+      userRepository.create.mockResolvedValue(Result.ok());
 
       const { useCase } = makeCreateUserUseCase({ userRepository });
       const input = makeUser();

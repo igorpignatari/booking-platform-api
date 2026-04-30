@@ -2,7 +2,6 @@ import { User } from "@contexts/users/domain/entity/User";
 import { UserErrors } from "@contexts/users/domain/errors/UserErrors";
 import type { HashServices } from "@core/contracts/HashServices";
 import { Result } from "@core/result/Result";
-import { AggregatedValidationError } from "@shared/domain/errors/AggregatedValidationError";
 import type { CreateUserRequest } from "../DTOs/createUserDTO";
 import type { ICreateUser } from "../ports/input/ICreateUser";
 import type { UserRepository } from "../ports/output/UserRepository";
@@ -26,7 +25,7 @@ export class CreateUserUseCase implements ICreateUser {
     const user = await User.create(request, this.hasher);
 
     if (user.isErr) {
-      return Result.err(new AggregatedValidationError(user.error));
+      return Result.err(user.error);
     }
     const isSaved = await this.repository.create(user.value);
     if (isSaved.isErr) {
