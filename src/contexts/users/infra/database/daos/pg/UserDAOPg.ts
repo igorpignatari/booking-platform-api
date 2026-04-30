@@ -7,7 +7,7 @@ export class UserDAOPg implements IUserDAO {
 
   async insert(user: UserRow): Promise<void> {
     await this.db.none(
-      `INSERT INTO users (id, name, email, password, phone, created_at, updated_at, role)
+      `INSERT INTO users (id, name, email, password, phone, role, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         user.id,
@@ -15,9 +15,9 @@ export class UserDAOPg implements IUserDAO {
         user.email,
         user.password,
         user.phone,
+        user.role,
         user.created_at,
         user.updated_at,
-        user.role,
       ],
     );
   }
