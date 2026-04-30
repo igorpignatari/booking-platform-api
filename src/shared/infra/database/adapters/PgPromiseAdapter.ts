@@ -22,6 +22,12 @@ export class PgPromiseAdapter implements Database {
     await this.connection.none(sql, params);
   }
 
+  async disconnect(): Promise<void> {
+    if ("$pool" in this.connection) {
+      await this.connection.$pool.end();
+    }
+  }
+
   tx<T>(work: (trx: Database) => Promise<T>): Promise<T> {
     if ("tx" in this.connection) {
       return this.connection.tx(async (t) => {
