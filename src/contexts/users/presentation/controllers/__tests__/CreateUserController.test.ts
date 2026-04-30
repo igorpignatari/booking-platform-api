@@ -1,6 +1,7 @@
 import { makeUser } from "@contexts/users/__tests__/factories/makeUser";
 import type { CreateUserRequest } from "@contexts/users/application/DTOs/createUserDTO";
 import type { ICreateUser } from "@contexts/users/application/ports/input/ICreateUser";
+import type { User } from "@contexts/users/domain/entity/User";
 import { CreateUserController } from "@contexts/users/presentation/controllers/CreateUserController";
 import { Result } from "@core/result/Result";
 import { makeHttpRequest } from "@shared/__tests__/factories/controller/makeHttpRequest";
@@ -19,7 +20,7 @@ describe("CreateUserController", () => {
         id: "uuid-123",
         name: "joe doe",
         createdAt: new Date("2024-01-01"),
-      } as any;
+      } as User;
 
       useCase.execute.mockResolvedValue(Result.ok(fakeUser));
 
@@ -41,7 +42,7 @@ describe("CreateUserController", () => {
       // Arrange
       const useCase = makeUseCaseMock();
       useCase.execute.mockResolvedValue(
-        Result.ok({ id: "1", name: "joe doe", createdAt: new Date() } as any),
+        Result.ok({ id: "1", name: "joe doe", createdAt: new Date() } as User),
       );
 
       const controller = new CreateUserController(useCase);
