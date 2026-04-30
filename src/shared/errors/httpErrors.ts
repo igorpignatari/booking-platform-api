@@ -26,6 +26,17 @@ export abstract class ValidationError extends BaseError {
   }
 }
 
+export class ConflictError extends BaseError {
+  override _tag: string;
+  override code: string;
+
+  constructor(message: string, code: string) {
+    super(message);
+    this._tag = "ConflictError" as const;
+    this.code = code;
+  }
+}
+
 export abstract class UnauthorizedError extends BaseError {
   override _tag: string;
   override code: string;
