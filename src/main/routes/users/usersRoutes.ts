@@ -1,9 +1,11 @@
+import { CreateUserSchema } from "@contexts/users/application/DTOs/createUserDTO";
+import { ValidationMiddleware } from "@shared/presentation/middlewares/ValidationMiddleware";
 import type { HttpAdapter } from "@shared/presentation/protocols/HttpAdapter";
-import { dependencies } from "src/main/dependencies";
+import type { Dependencies } from "src/main/dependencies";
 import { makeUsersModule } from "src/main/factories/users/makeUsersModule";
 
-export const usersModule = makeUsersModule(dependencies);
-
-export const registerUsersRoutes = async (adapter: HttpAdapter) => {
-  adapter.register("post", "/users", usersModule.createUserController, dependencies.logger, []);
+export const registerUsersRoutes = (adapter: HttpAdapter, deps: Dependencies) => {
+  const usersModule = makeUsersModule(deps);
+  const middlewares = [new ValidationMiddleware(CreateUserSchema)];
+  adapter.register("post", "/users", usersModule.createUserController, deps.logger, middlewares);
 };
