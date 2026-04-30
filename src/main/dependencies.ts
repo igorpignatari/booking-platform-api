@@ -1,13 +1,14 @@
-import { HashInMemory } from "@shared/__tests__/inMemory/HashInMemory";
 import { env } from "@shared/env/env";
+import { BcryptHasher } from "@shared/infra/crypto/BcryptHasher";
 import { PgPromiseAdapter } from "@shared/infra/database/adapters/PgPromiseAdapter";
 import { getDbConnection } from "@shared/infra/database/connections/PgPromiseConnection";
 import { PinoLogger } from "@shared/logger/PinoLogger";
 
-export type Dependencies = typeof dependencies;
+export type Dependencies = ReturnType<typeof makeDependencies>;
 
-export const dependencies = {
-  hash: new HashInMemory(),
-  db: new PgPromiseAdapter(getDbConnection(env.databaseUrl)),
-  logger: PinoLogger.create(),
-} as const;
+export const makeDependencies = () =>
+  ({
+    hash: new BcryptHasher(),
+    db: new PgPromiseAdapter(getDbConnection(env.databaseUrl)),
+    logger: PinoLogger.create(),
+  }) as const;
