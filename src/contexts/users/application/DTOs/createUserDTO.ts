@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const CreateUserSchema = z.object({
+const CreateUserZodObject = z.object({
   name: z
     .string()
     .min(3, "Name must be at least 3 characters!")
@@ -27,4 +27,7 @@ export const CreateUserSchema = z.object({
     .regex(/^[0-9]+$/, "Phone number must contain only numbers!"),
 });
 
-export type CreateUserRequest = z.infer<typeof CreateUserSchema>;
+export const CreateUserSchema = z.object({
+  body: CreateUserZodObject,
+});
+export type CreateUserRequest = z.infer<typeof CreateUserZodObject>;
