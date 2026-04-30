@@ -1,5 +1,5 @@
 import type { ZodObject } from "zod";
-import { zodErrorMessageParser } from "../helpers/zodErrorMessageParser";
+import { zodErrorMessageParser } from "../helpers/error/zodErrorMessageParser";
 import type { HttpRequest } from "../http/HttpRequest";
 import type { HttpResponse } from "../http/HttpResponse";
 import type { Middleware } from "../protocols/Middleware";
@@ -16,15 +16,8 @@ export class ValidationMiddleware implements Middleware {
         data: zodErrorMessageParser(result.error),
       };
     }
-    const data = result.data as {
-      body?: unknown;
-      params?: unknown;
-      query?: unknown;
-    };
 
-    if (data.body !== undefined) httpRequest.body = data.body;
-    if (data.params !== undefined) httpRequest.params = data.params;
-    if (data.query !== undefined) httpRequest.query = data.query;
+    Object.assign(httpRequest, result.data);
 
     return undefined;
   }
