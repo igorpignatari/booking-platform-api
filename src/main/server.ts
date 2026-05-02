@@ -21,7 +21,7 @@ export const bootstrap = async (deps: Dependencies): Promise<void> => {
   const http = new HttpFastifyAdapter();
   registerUsersRoutes(http, deps);
 
-  await http.listen(env.port, deps.logger);
+  await http.listen(env.port, env.host, deps.logger);
 
   const shutdown = async (signal: string) => {
     deps.logger.info("Received shutdown signal, closing server...", { signal });

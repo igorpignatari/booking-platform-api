@@ -53,9 +53,9 @@ export class HttpFastifyAdapter implements HttpAdapter {
     });
   }
 
-  async listen(port: number, logger: ILogger): Promise<void> {
+  async listen(port: number, host: string, logger: ILogger): Promise<void> {
     try {
-      const address = await this.app.listen({ port, host: "0.0.0.0" });
+      const address = await this.app.listen({ port, host });
       logger.info("Server is listening", { address, port });
     } catch (err) {
       const code = (err as NodeJS.ErrnoException)?.code;

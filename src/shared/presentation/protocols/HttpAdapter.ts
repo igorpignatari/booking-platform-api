@@ -13,6 +13,6 @@ export interface HttpAdapter {
     logger: ILogger,
     middlewares: Middleware[],
   ): void;
-  listen(port: number, logger: ILogger): Promise<void>;
+  listen(port: number, host: string, logger: ILogger): Promise<void>;
   close(): Promise<void>;
 }
