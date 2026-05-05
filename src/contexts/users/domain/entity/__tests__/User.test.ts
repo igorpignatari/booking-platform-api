@@ -21,7 +21,7 @@ describe("User entity", () => {
       expect(result.value).toBeInstanceOf(User);
       expect(result.value.id).toBeDefined();
       expect(result.value.name).toBe("joe doe");
-      expect(result.value.phone).toBe("+1234567890");
+      expect(result.value.phone).toBe("11234567890");
     });
 
     it("should wrap email in Email value object", async () => {

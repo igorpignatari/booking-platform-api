@@ -4,6 +4,6 @@ export const makeUser = (overrides?: Partial<CreateUserRequest>): CreateUserRequ
   name: "joe doe",
   email: "joe_doe@example.com",
   password: "@Password123",
-  phone: "+1234567890",
+  phone: "11234567890",
   ...overrides,
 });
