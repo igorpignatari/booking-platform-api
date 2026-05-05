@@ -75,4 +75,12 @@ export class HttpFastifyAdapter implements HttpAdapter {
   async close(): Promise<void> {
     await this.app.close();
   }
+
+  async ready(): Promise<void> {
+    await this.app.ready();
+  }
+
+  inject(options: import("fastify").InjectOptions) {
+    return this.app.inject(options);
+  }
 }
