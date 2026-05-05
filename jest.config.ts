@@ -4,6 +4,7 @@ const config: Config = {
   rootDir: ".",
   testEnvironment: "node",
   testMatch: ["<rootDir>/src/**/__tests__/**/*.test.ts", "<rootDir>/src/**/*.spec.ts"],
+  testPathIgnorePatterns: ["/node_modules/", "/__tests__/integration/", "/__tests__/e2e/"],
   transform: {
     "^.+\\.(t|j)sx?$": [
       "@swc/jest",
