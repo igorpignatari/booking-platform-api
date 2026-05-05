@@ -12,7 +12,7 @@ export class ValidationMiddleware implements Middleware {
 
     if (!result.success) {
       return {
-        statusCode: 400,
+        statusCode: 422,
         data: zodErrorMessageParser(result.error),
       };
     }

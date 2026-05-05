@@ -71,7 +71,7 @@ describe("ValidationMiddleware", () => {
       const result = await middleware.handle(request);
 
       expect(result).toBeDefined();
-      expect(result?.statusCode).toBe(400);
+      expect(result?.statusCode).toBe(422);
       expect(result?.data).toEqual(
         expect.arrayContaining([
           expect.stringContaining("Invalid email"),
@@ -135,7 +135,7 @@ describe("ValidationMiddleware", () => {
 
       const result = await middleware.handle(request);
 
-      expect(result?.statusCode).toBe(400);
+      expect(result?.statusCode).toBe(422);
       expect(result?.data).toHaveLength(3);
     });
 
