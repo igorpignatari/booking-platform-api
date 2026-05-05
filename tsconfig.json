@@ -31,6 +31,9 @@
       ],
       "@contexts/*": [
         "src/contexts/*"
+      ],
+      "@main/*": [
+        "src/main/*"
       ]
     }
   },
