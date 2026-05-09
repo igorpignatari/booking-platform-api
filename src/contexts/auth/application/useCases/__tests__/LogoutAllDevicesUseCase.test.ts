@@ -5,17 +5,18 @@ import { LogoutAllDevicesUseCase } from "@contexts/auth/application/useCases/Log
 import { Result } from "@core/result/Result";
 import { DBError } from "@shared/infra/errors/DBError";
 
-describe("Logout all devices use case", () => {
+describe("LogoutAllDevicesUseCase", () => {
   describe("success", () => {
-    it("should delete all refresh tokens for a user", async () => {
+    it("should revoke all refresh tokens for a user", async () => {
       // arrange
       const authRepository = new AuthRepositoryInMemory();
       const userId = "uuid-123";
 
-      // save many tokens from the same user
-      await authRepository.save(makeRefreshToken({ userId, token: "token-1" }));
-      await authRepository.save(makeRefreshToken({ userId, token: "token-2" }));
-      await authRepository.save(makeRefreshToken({ userId, token: "token-3" }));
+      await authRepository.save(makeRefreshToken({ id: "token-1", userId }));
+
+      await authRepository.save(makeRefreshToken({ id: "token-2", userId }));
+
+      await authRepository.save(makeRefreshToken({ id: "token-3", userId }));
 
       // act
       const useCase = new LogoutAllDevicesUseCase(authRepository);
@@ -24,30 +25,45 @@ describe("Logout all devices use case", () => {
       // assert
       expect(result.isOk).toBe(true);
 
-      // check that all tokens were deleted
-      const t1 = await authRepository.findByRefreshToken("token-1");
-      const t2 = await authRepository.findByRefreshToken("token-2");
-      const t3 = await authRepository.findByRefreshToken("token-3");
+      const t1 = await authRepository.findByJti("token-1");
+      const t2 = await authRepository.findByJti("token-2");
+      const t3 = await authRepository.findByJti("token-3");
+      console.log(t1.value);
 
-      expect(t1.value).toBeNull();
-      expect(t2.value).toBeNull();
-      expect(t3.value).toBeNull();
+      expect(t1.value?.isRevoked()).toBe(true);
+      expect(t2.value?.isRevoked()).toBe(true);
+      expect(t3.value?.isRevoked()).toBe(true);
     });
 
-    it("should not delete tokens from other users", async () => {
+    it("should not revoke tokens from other users", async () => {
       // arrange
       const authRepository = new AuthRepositoryInMemory();
 
-      await authRepository.save(makeRefreshToken({ userId: "uuid-123", token: "token-user-1" }));
-      await authRepository.save(makeRefreshToken({ userId: "uuid-456", token: "token-user-2" }));
+      await authRepository.save(
+        makeRefreshToken({
+          id: "token-user-1",
+          userId: "uuid-123",
+        }),
+      );
+
+      await authRepository.save(
+        makeRefreshToken({
+          id: "token-user-2",
+          userId: "uuid-456",
+        }),
+      );
+
+      const useCase = new LogoutAllDevicesUseCase(authRepository);
 
       // act
-      const useCase = new LogoutAllDevicesUseCase(authRepository);
       await useCase.execute({ userId: "uuid-123" });
 
       // assert
-      const other = await authRepository.findByRefreshToken("token-user-2");
-      expect(other.value).not.toBeNull();
+      const target = await authRepository.findByJti("token-user-1");
+      const other = await authRepository.findByJti("token-user-2");
+
+      expect(target.value?.isRevoked()).toBe(true);
+      expect(other.value?.isRevoked()).toBe(false);
     });
   });
 
@@ -55,13 +71,17 @@ describe("Logout all devices use case", () => {
     it("should return error when repository fails", async () => {
       // arrange
       const authRepository = makeMockAuthRepository();
-      authRepository.deleteAllByUserId.mockResolvedValue(
+
+      authRepository.revokeAllByUserId.mockResolvedValue(
         Result.err(DBError.create("Internal error")),
       );
 
-      // act
       const useCase = new LogoutAllDevicesUseCase(authRepository);
-      const result = await useCase.execute({ userId: "uuid-123" });
+
+      // act
+      const result = await useCase.execute({
+        userId: "uuid-123",
+      });
 
       // assert
       expect(result.isErr).toBe(true);

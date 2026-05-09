@@ -2,6 +2,7 @@ import type { JWTServices } from "@contexts/auth/domain/contracts/JWTServices";
 import { RefreshToken } from "@contexts/auth/domain/entities/RefreshToken";
 import { AuthErrors } from "@contexts/auth/domain/errors/AuthErrors";
 import type { TRefreshToken } from "@contexts/auth/domain/types/TRefreshToken";
+import type { UserRole } from "@contexts/auth/infra/database/types/UserRole";
 import type { HashServices } from "@core/contracts/HashServices";
 import { Result } from "@core/result/Result";
 import { env } from "@shared/env/env";
@@ -36,27 +37,32 @@ export class LoginUseCase implements ILogin {
       return Result.err(AuthErrors.USER_LOGIN_ERROR.create("Email or password is invalid"));
     }
 
-    const accessToken = this.jwtService.generateAccessToken({
-      id: isUser.value.id,
-    });
-
     const expiresAt = new Date(Date.now() + parseDuration(env.jwtRefreshExpiresIn));
 
     const refreshTokenData: TRefreshToken = {
+      id: crypto.randomUUID(),
       userId: isUser.value.id,
-      token: this.jwtService.generateRefreshToken({
-        id: isUser.value.id,
-      }),
       expiresAt: expiresAt,
     };
 
-    const refreshToken = RefreshToken.create(refreshTokenData);
+    const refreshTokenEntity = RefreshToken.create(refreshTokenData);
 
-    const isSave = await this.authRepository.save(refreshToken);
+    const isSave = await this.authRepository.save(refreshTokenEntity);
 
     if (isSave.isErr) {
       return Result.err(isSave.error);
     }
-    return Result.ok({ accessToken, refreshToken: refreshToken.token });
+
+    const accessToken = this.jwtService.generateAccessToken({
+      sub: isUser.value.id,
+      role: isUser.value.role as UserRole,
+    });
+
+    const refreshToken = this.jwtService.generateRefreshToken({
+      sub: refreshTokenEntity.userId,
+      jti: refreshTokenEntity.id,
+    });
+
+    return Result.ok({ accessToken, refreshToken });
   }
 }

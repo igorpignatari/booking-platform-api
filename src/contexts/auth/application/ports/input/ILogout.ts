@@ -1,6 +1,6 @@
 import type { Result } from "@core/result/Result";
-import type { RefreshTokenRequest } from "../../DTOs/RefreshTokenDTO";
+import type { LogoutRequest } from "../../DTOs/LogoutDTO";
 
 export interface ILogout {
-  execute(refreshToken: RefreshTokenRequest): Promise<Result<void>>;
+  execute(jit: LogoutRequest): Promise<Result<void>>;
 }

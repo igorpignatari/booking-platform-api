@@ -1,3 +1,3 @@
 export type LogoutRequest = {
-  userId: string;
+  jti: string;
 };

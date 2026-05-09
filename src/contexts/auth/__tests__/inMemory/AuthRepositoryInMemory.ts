@@ -5,24 +5,28 @@ import { Result } from "@core/result/Result";
 export class AuthRepositoryInMemory implements AuthRepository {
   private refreshTokens: RefreshToken[] = [];
 
-  save(refreshToken: RefreshToken): Promise<Result<void>> {
+  async save(refreshToken: RefreshToken): Promise<Result<void>> {
     this.refreshTokens.push(refreshToken);
-    return Promise.resolve(Result.ok(undefined));
+    return Result.ok();
   }
-  findByRefreshToken(token: string): Promise<Result<RefreshToken | null>> {
+  async findByJti(jti: string): Promise<Result<RefreshToken | null>> {
     const refreshToken = this.refreshTokens.find((refreshToken) => {
-      return refreshToken.token === token;
+      return refreshToken.id === jti;
     });
-    return Promise.resolve(refreshToken ? Result.ok(refreshToken) : Result.ok(null));
+    return refreshToken ? Result.ok(refreshToken) : Result.ok(null);
   }
-  delete(token: string): Promise<Result<void>> {
-    this.refreshTokens = this.refreshTokens.filter((refreshToken) => refreshToken.token !== token);
-    return Promise.resolve(Result.ok(undefined));
-  }
-  deleteAllByUserId(userId: string): Promise<Result<void>> {
-    this.refreshTokens = this.refreshTokens.filter(
-      (refreshToken) => refreshToken.userId !== userId,
+  async revoke(jti: string): Promise<Result<void>> {
+    this.refreshTokens = this.refreshTokens.map((token) =>
+      token.id === jti ? token.revoke() : token,
     );
-    return Promise.resolve(Result.ok(undefined));
+
+    return Result.ok();
+  }
+  async revokeAllByUserId(userId: string): Promise<Result<void>> {
+    this.refreshTokens = this.refreshTokens.map((token) =>
+      token.userId === userId ? token.revoke() : token,
+    );
+
+    return Result.ok();
   }
 }

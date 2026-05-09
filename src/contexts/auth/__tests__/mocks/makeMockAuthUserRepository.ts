@@ -2,4 +2,5 @@ import type { AuthUserRepository } from "@contexts/auth/application/ports/output
 
 export const makeMockAuthUserRepository = (): jest.Mocked<AuthUserRepository> => ({
   findByEmailForAuth: jest.fn(),
+  findByUserIdForAuth: jest.fn(),
 });

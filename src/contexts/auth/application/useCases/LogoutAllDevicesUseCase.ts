@@ -6,11 +6,11 @@ import type { AuthRepository } from "../ports/output/AuthRepository";
 export class LogoutAllDevicesUseCase implements ILogoutAllDevices {
   constructor(private readonly authRepository: AuthRepository) {}
   async execute({ userId }: LogoutRequest): Promise<Result<void>> {
-    const isDeletAll = await this.authRepository.deleteAllByUserId(userId);
+    const isDeletAll = await this.authRepository.revokeAllByUserId(userId);
 
     if (isDeletAll.isErr) {
       return Result.err(isDeletAll.error);
     }
-    return Promise.resolve(Result.ok(undefined));
+    return Result.ok();
   }
 }

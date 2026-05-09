@@ -2,6 +2,7 @@ import type { JWTServices } from "@contexts/auth/domain/contracts/JWTServices";
 import { RefreshToken } from "@contexts/auth/domain/entities/RefreshToken";
 import { AuthErrors } from "@contexts/auth/domain/errors/AuthErrors";
 import type { TRefreshToken } from "@contexts/auth/domain/types/TRefreshToken";
+import type { UserRole } from "@contexts/auth/infra/database/types/UserRole";
 import { Result } from "@core/result/Result";
 import { env } from "@shared/env/env";
 import { parseDuration } from "@shared/utils/parseDuration";
@@ -9,51 +10,79 @@ import type { AuthResponse } from "../DTOs/AuthResponseDTO";
 import type { RefreshTokenRequest } from "../DTOs/RefreshTokenDTO";
 import type { IRefreshToken } from "../ports/input/IRefreshToken";
 import type { AuthRepository } from "../ports/output/AuthRepository";
+import type { AuthUserRepository } from "../ports/output/AuthUserRepository";
 
 export class RefreshTokenUseCase implements IRefreshToken {
   constructor(
+    private readonly authUserRepository: AuthUserRepository,
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JWTServices,
   ) {}
 
-  async execute({ refreshToken }: RefreshTokenRequest): Promise<Result<AuthResponse>> {
-    const isValidToken = await this.authRepository.findByRefreshToken(refreshToken);
+  async execute({ jti }: RefreshTokenRequest): Promise<Result<AuthResponse>> {
+    const token = await this.authRepository.findByJti(jti);
 
-    if (isValidToken.isErr) {
-      return Result.err(isValidToken.error);
+    if (token.isErr) {
+      return Result.err(token.error);
     }
-    if (isValidToken.value === null) {
+
+    if (token.value === null) {
       return Result.err(AuthErrors.USER_UNAUTHORIZED_ERROR.create("Token is invalid"));
     }
-    if (isValidToken.value.isExpired()) {
+
+    if (token.value.isExpired()) {
       return Result.err(AuthErrors.USER_UNAUTHORIZED_ERROR.create("Token is expired"));
     }
 
-    const isDelete = await this.authRepository.delete(refreshToken);
-    if (isDelete.isErr) {
-      return Result.err(isDelete.error);
+    if (token.value.revokedAt !== null) {
+      return Result.err(AuthErrors.USER_UNAUTHORIZED_ERROR.create("Token is revoked"));
+    }
+
+    const user = await this.authUserRepository.findByUserIdForAuth(token.value.userId);
+
+    if (user.isErr) {
+      return Result.err(user.error);
+    }
+
+    if (user.value === null) {
+      return Result.err(AuthErrors.USER_UNAUTHORIZED_ERROR.create("User not found"));
+    }
+
+    const isRevoked = await this.authRepository.revoke(jti);
+
+    if (isRevoked.isErr) {
+      return Result.err(isRevoked.error);
     }
 
     const expiresAt = new Date(Date.now() + parseDuration(env.jwtRefreshExpiresIn));
 
-    const refreshTokenData: TRefreshToken = {
-      userId: isValidToken.value.userId,
-      token: this.jwtService.generateRefreshToken({
-        id: isValidToken.value.userId,
-      }),
-      expiresAt: expiresAt,
+    const newRefreshTokenData: TRefreshToken = {
+      id: crypto.randomUUID(),
+      userId: token.value.userId,
+      expiresAt,
     };
 
-    const newRefreshToken = RefreshToken.create(refreshTokenData);
+    const newRefreshToken = RefreshToken.create(newRefreshTokenData);
 
     const isSave = await this.authRepository.save(newRefreshToken);
+
     if (isSave.isErr) {
       return Result.err(isSave.error);
     }
 
     const accessToken = this.jwtService.generateAccessToken({
-      id: isValidToken.value.userId,
+      sub: token.value.userId,
+      role: user.value.role as UserRole,
     });
-    return Result.ok({ accessToken, refreshToken: newRefreshToken.token });
+
+    const refreshToken = this.jwtService.generateRefreshToken({
+      sub: token.value.userId,
+      jti: newRefreshToken.id,
+    });
+
+    return Result.ok({
+      accessToken,
+      refreshToken,
+    });
   }
 }
