@@ -1,9 +1,19 @@
 import "dotenv/config";
 import { z } from "zod";
 
-const durationSchema = z.string().regex(/^\d+(ms|s|m|h|d|w|y)$/, {
-  message: "Must be a duration like '15m', '7d', '1h', '500ms'",
-});
+type DurationUnit = "ms" | "s" | "m" | "h" | "d" | "w" | "y";
+type Duration = `${number}${DurationUnit}`;
+
+const durationSchema = z.custom<Duration>(
+  (val) => typeof val === "string" && /^\d+(ms|s|m|h|d|w|y)$/.test(val),
+  {
+    message: "Must be a duration like '15m', '7d', '1h', '500ms'",
+  },
+);
+
+// const durationSchema = z.string().regex(/^\d+(ms|s|m|h|d|w|y)$/, {
+//   message: "Must be a duration like '15m', '7d', '1h', '500ms'",
+// });
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
