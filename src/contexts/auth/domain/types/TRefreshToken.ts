@@ -1,5 +1,5 @@
 export type TRefreshToken = {
+  id: string;
   userId: string;
-  token: string;
   expiresAt: Date;
 };
