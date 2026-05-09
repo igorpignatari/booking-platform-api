@@ -17,7 +17,7 @@ describe("LogoutAllDevicesController", () => {
       // Act
       const controller = new LogoutAllDevicesController(useCase);
       const response = await controller.handle(
-        makeHttpRequest<LogoutRequest>({ userId: "uuid-123" }),
+        makeHttpRequest<LogoutRequest>({ jti: "valid-jti" }),
       );
 
       // Assert
@@ -38,11 +38,12 @@ describe("LogoutAllDevicesController", () => {
 
       // Act
       const controller = new LogoutAllDevicesController(useCase);
-      const input = { userId: "uuid-123" };
+      const input: LogoutRequest = { jti: "valid-jti" };
 
       await controller.handle(makeHttpRequest<LogoutRequest>(input));
 
       // Assert
+      expect(useCase.execute).toHaveBeenCalledTimes(1);
       expect(useCase.execute).toHaveBeenCalledWith(input);
     });
   });
@@ -55,9 +56,7 @@ describe("LogoutAllDevicesController", () => {
 
       // Act
       const controller = new LogoutAllDevicesController(useCase);
-      const response = await controller.handle(
-        makeHttpRequest<LogoutRequest>({ userId: "uuid-123" }),
-      );
+      const response = await controller.handle(makeHttpRequest<LogoutRequest>({ jti: "any-jti" }));
 
       // Assert
       expect(response.statusCode).toBe(500);
@@ -70,9 +69,7 @@ describe("LogoutAllDevicesController", () => {
 
       // Act
       const controller = new LogoutAllDevicesController(useCase);
-      const response = await controller.handle(
-        makeHttpRequest<LogoutRequest>({ userId: "uuid-123" }),
-      );
+      const response = await controller.handle(makeHttpRequest<LogoutRequest>({ jti: "any-jti" }));
 
       // Assert
       expect(response.statusCode).toBe(500);

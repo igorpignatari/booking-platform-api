@@ -7,10 +7,10 @@ import { DBError } from "@shared/infra/errors/DBError";
 
 const makeUseCaseMock = (): jest.Mocked<IRefreshToken> => ({ execute: jest.fn() });
 
-describe("Refresh token controller", () => {
+describe("RefreshTokenController", () => {
   describe("success", () => {
-    //arrange
     it("should return 200 with new accessToken in body and new refreshToken in cookie", async () => {
+      //arrange
       const useCase = makeUseCaseMock();
       useCase.execute.mockResolvedValue(
         Result.ok({ accessToken: "new-access-token", refreshToken: "new-refresh-token" }),
@@ -19,7 +19,7 @@ describe("Refresh token controller", () => {
       //act
       const controller = new RefreshTokenController(useCase);
       const response = await controller.handle(
-        makeHttpRequest<RefreshTokenRequest>({ refreshToken: "old-refresh-token" }),
+        makeHttpRequest<RefreshTokenRequest>({ jti: "valid-jti" }),
       );
 
       //assert
@@ -44,17 +44,18 @@ describe("Refresh token controller", () => {
 
       //act
       const controller = new RefreshTokenController(useCase);
-      const input = { refreshToken: "old-refresh-token" };
+      const input: RefreshTokenRequest = { jti: "valid-jti" };
 
       await controller.handle(makeHttpRequest<RefreshTokenRequest>(input));
 
       //assert
+      expect(useCase.execute).toHaveBeenCalledTimes(1);
       expect(useCase.execute).toHaveBeenCalledWith(input);
     });
   });
 
   describe("failure", () => {
-    it("should return 500 when token is invalid", async () => {
+    it("should return 500 when use case returns error", async () => {
       //arrange
       const useCase = makeUseCaseMock();
       useCase.execute.mockResolvedValue(Result.err(DBError.create("Internal error")));
@@ -62,7 +63,7 @@ describe("Refresh token controller", () => {
       //act
       const controller = new RefreshTokenController(useCase);
       const response = await controller.handle(
-        makeHttpRequest<RefreshTokenRequest>({ refreshToken: "bad-token" }),
+        makeHttpRequest<RefreshTokenRequest>({ jti: "any-jti" }),
       );
 
       //assert
@@ -77,7 +78,7 @@ describe("Refresh token controller", () => {
       //act
       const controller = new RefreshTokenController(useCase);
       const response = await controller.handle(
-        makeHttpRequest<RefreshTokenRequest>({ refreshToken: "any-token" }),
+        makeHttpRequest<RefreshTokenRequest>({ jti: "any-jti" }),
       );
 
       //assert

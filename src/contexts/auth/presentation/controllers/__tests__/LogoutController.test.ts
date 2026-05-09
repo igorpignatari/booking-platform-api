@@ -17,7 +17,7 @@ describe("Logout controller", () => {
       //act
       const controller = new LogoutController(useCase);
       const response = await controller.handle(
-        makeHttpRequest<RefreshTokenRequest>({ refreshToken: "valid-refresh-token" }),
+        makeHttpRequest<RefreshTokenRequest>({ jti: "valid-refresh-token" }),
       );
 
       //assert
@@ -38,7 +38,7 @@ describe("Logout controller", () => {
 
       //act
       const controller = new LogoutController(useCase);
-      const input = { refreshToken: "valid-refresh-token" };
+      const input = { jti: "valid-refresh-token" };
 
       await controller.handle(makeHttpRequest<RefreshTokenRequest>(input));
 
@@ -56,7 +56,7 @@ describe("Logout controller", () => {
       //act
       const controller = new LogoutController(useCase);
       const response = await controller.handle(
-        makeHttpRequest<RefreshTokenRequest>({ refreshToken: "bad-token" }),
+        makeHttpRequest<RefreshTokenRequest>({ jti: "bad-token" }),
       );
 
       //assert
@@ -71,7 +71,7 @@ describe("Logout controller", () => {
       //act
       const controller = new LogoutController(useCase);
       const response = await controller.handle(
-        makeHttpRequest<RefreshTokenRequest>({ refreshToken: "any-token" }),
+        makeHttpRequest<RefreshTokenRequest>({ jti: "any-token" }),
       );
 
       //assert
