@@ -4,6 +4,7 @@ import { AuthErrors } from "@contexts/auth/domain/errors/AuthErrors";
 import { Result } from "@core/result/Result";
 import { tryCatchAsync } from "@core/tryCatch/tryCatch";
 import { DBError } from "@shared/infra/errors/DBError";
+import { DatabaseError } from "pg-protocol";
 import type { AuthDAO } from "../DAOs/pg/AuthDAO";
 import { AuthMapper } from "../mapper/AuthMapper";
 import type { AuthRow } from "../types/AuthRow";
@@ -17,7 +18,7 @@ export class AuthRepositoryImpl implements AuthRepository {
         await this.authDAO.insert(AuthMapper.toRow(refreshToken));
       },
       (err: unknown) => {
-        if (err instanceof Error && "code" in err && err.code === "23505") {
+        if (err instanceof DatabaseError && err.code === "23505") {
           return AuthErrors.REFRESH_TOKEN_ALREADY_EXISTS.create(err.message);
         }
         return DBError.create(err instanceof Error ? err.message : "unknown error");

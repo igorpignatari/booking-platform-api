@@ -1,7 +1,7 @@
 export type AuthRow = {
   jti: string;
-  userId: string;
-  createdAt: string;
-  expiresAt: string;
-  revokedAt: string | null;
+  user_id: string;
+  created_at: string;
+  expires_at: string;
+  revoked_at: string | null;
 };
