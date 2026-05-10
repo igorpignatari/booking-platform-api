@@ -22,7 +22,7 @@ export class AuthUserRepositoryImpl implements AuthUserRepository {
   findByUserIdForAuth(userId: string): Promise<Result<AuthUser | null>> {
     return tryCatchAsync(
       async () => {
-        const user = await this.authUserDAO.findByEmail(userId);
+        const user = await this.authUserDAO.findByUserId(userId);
         return user ? AuthUserMapper.toDomain(user) : null;
       },
       (err: unknown) => DBError.create(err instanceof Error ? err.message : "unknown error"),

@@ -10,6 +10,6 @@ export class AuthUserDAO implements IAuthUserDAO {
   }
 
   findByUserId(userId: string): Promise<AuthUserRow | null> {
-    return this.db.oneOrNone("SELECT * FROM users WHERE userId = $1", [userId]);
+    return this.db.oneOrNone("SELECT * FROM users WHERE id = $1", [userId]);
   }
 }
