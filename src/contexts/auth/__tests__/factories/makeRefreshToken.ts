@@ -6,7 +6,7 @@ export const makeRefreshToken = (overrides?: {
   expiresAt?: Date;
 }) =>
   RefreshToken.create({
-    id: overrides?.id ?? "uuid-123",
-    userId: overrides?.userId ?? "uuid-123",
+    id: overrides?.id ?? crypto.randomUUID(),
+    userId: overrides?.userId ?? crypto.randomUUID(),
     expiresAt: overrides?.expiresAt ?? new Date(Date.now() + 1000 * 60 * 60 * 24),
   });
