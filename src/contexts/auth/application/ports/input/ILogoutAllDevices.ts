@@ -1,6 +1,6 @@
 import type { Result } from "@core/result/Result";
-import type { LogoutRequest } from "../../DTOs/LogoutDTO";
+import type { LogoutAllDevicesRequest } from "../../DTOs/LogoutAllDevicesDTO";
 
 export interface ILogoutAllDevices {
-  execute(userId: LogoutRequest): Promise<Result<void>>;
+  execute(userId: LogoutAllDevicesRequest): Promise<Result<void>>;
 }

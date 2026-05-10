@@ -1,11 +1,11 @@
 import { Result } from "@core/result/Result";
-import type { LogoutRequest } from "../DTOs/LogoutDTO";
+import type { LogoutAllDevicesRequest } from "../DTOs/LogoutAllDevicesDTO";
 import type { ILogoutAllDevices } from "../ports/input/ILogoutAllDevices";
 import type { AuthRepository } from "../ports/output/AuthRepository";
 
 export class LogoutAllDevicesUseCase implements ILogoutAllDevices {
   constructor(private readonly authRepository: AuthRepository) {}
-  async execute({ userId }: LogoutRequest): Promise<Result<void>> {
+  async execute({ userId }: LogoutAllDevicesRequest): Promise<Result<void>> {
     const isDeletAll = await this.authRepository.revokeAllByUserId(userId);
 
     if (isDeletAll.isErr) {
