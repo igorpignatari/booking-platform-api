@@ -18,6 +18,10 @@ export class PgPromiseAdapter implements Database {
     return this.connection.oneOrNone(sql, params);
   }
 
+  manyOrNone<T = any>(sql: string, params?: unknown[]): Promise<T[]> {
+    return this.connection.manyOrNone(sql, params);
+  }
+
   async none(sql: string, params?: unknown[]): Promise<void> {
     await this.connection.none(sql, params);
   }
