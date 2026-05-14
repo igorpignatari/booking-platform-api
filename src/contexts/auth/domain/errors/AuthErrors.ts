@@ -1,9 +1,4 @@
-import {
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-  UnauthorizedError,
-} from "@shared/errors/httpErrors";
+import { ConflictError, ForbiddenError, UnauthorizedError } from "@shared/errors/httpErrors";
 
 class UserUnauthorizedError extends UnauthorizedError {
   private constructor(message: string) {
@@ -35,7 +30,7 @@ class UserLoginError extends UnauthorizedError {
   }
 }
 
-class RefreshTokenNotFoundError extends NotFoundError {
+class RefreshTokenNotFoundError extends UnauthorizedError {
   private constructor(message: string) {
     super(message, "REFRESH_TOKEN_NOT_FOUND");
   }

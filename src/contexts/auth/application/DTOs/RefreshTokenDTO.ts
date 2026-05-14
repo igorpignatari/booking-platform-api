@@ -1,3 +1,3 @@
 export type RefreshTokenRequest = {
-  jti: string;
+  refreshToken: string;
 };
