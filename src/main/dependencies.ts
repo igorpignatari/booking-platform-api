@@ -1,3 +1,4 @@
+import { JWTServicesImpl } from "@contexts/auth/infra/jwt/JWTServicesImpl";
 import { env } from "@shared/env/env";
 import { BcryptHasher } from "@shared/infra/crypto/BcryptHasher";
 import { PgPromiseAdapter } from "@shared/infra/database/adapters/PgPromiseAdapter";
@@ -10,5 +11,6 @@ export const makeDependencies = () =>
   ({
     hash: new BcryptHasher(),
     db: new PgPromiseAdapter(getDbConnection(env.databaseUrl)),
+    jwt: new JWTServicesImpl(),
     logger: PinoLogger.create(),
   }) as const;

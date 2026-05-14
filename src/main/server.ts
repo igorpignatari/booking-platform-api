@@ -1,6 +1,7 @@
 import { env } from "@shared/env/env";
 import { HttpFastifyAdapter } from "@shared/infra/http/adapters/fastify/HttpFastifyAdapter";
 import type { Dependencies } from "./dependencies";
+import { registerAuthRoutes } from "./routes/auth/authRoutes";
 import { registerUsersRoutes } from "./routes/users/usersRoutes";
 
 export const bootstrap = async (deps: Dependencies): Promise<void> => {
@@ -20,6 +21,7 @@ export const bootstrap = async (deps: Dependencies): Promise<void> => {
 
   const http = new HttpFastifyAdapter();
   registerUsersRoutes(http, deps);
+  registerAuthRoutes(http, deps);
 
   await http.listen(env.port, env.host, deps.logger);
 
