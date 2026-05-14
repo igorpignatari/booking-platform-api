@@ -28,6 +28,7 @@ test-coverage:
 	npm run test:coverage
 
 test-all:
+	sudo docker compose -f docker-compose.test.yml down
 	sudo docker compose -f docker-compose.test.yml up -d
 	npx jest && npx jest --config jest.integration.config.ts
 	sudo docker compose -f docker-compose.test.yml down
