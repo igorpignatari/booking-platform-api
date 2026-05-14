@@ -1,4 +1,5 @@
 import type { ILogger } from "@core/contracts/ILogger";
+import fastifyCookie from "@fastify/cookie";
 import type { HttpRequest } from "@shared/presentation/http/HttpRequest";
 import type { Method } from "@shared/presentation/http/Method";
 import type { Controller } from "@shared/presentation/protocols/Controller";
@@ -11,6 +12,7 @@ export class HttpFastifyAdapter implements HttpAdapter {
   private readonly app: FastifyInstance;
   constructor() {
     this.app = fastify();
+    this.app.register(fastifyCookie);
   }
 
   httpRequestMapper(req: FastifyRequest, logger: ILogger): HttpRequest {
@@ -20,6 +22,7 @@ export class HttpFastifyAdapter implements HttpAdapter {
       body: req.body,
       query: req.query,
       headers: req.headers as Record<string, string | string[] | undefined>,
+      cookies: req.cookies,
       correlationId,
       logger: logger.child({
         correlationId,
@@ -49,6 +52,19 @@ export class HttpFastifyAdapter implements HttpAdapter {
       }
 
       const httpResponse = await controller.handle(request);
+
+      if (httpResponse.cookies) {
+        for (const cookie of httpResponse.cookies) {
+          rep.setCookie(cookie.name, cookie.value, {
+            path: "/",
+            ...(cookie.httpOnly !== undefined && { httpOnly: cookie.httpOnly }),
+            ...(cookie.secure !== undefined && { secure: cookie.secure }),
+            ...(cookie.sameSite !== undefined && { sameSite: cookie.sameSite }),
+            ...(cookie.maxAge !== undefined && { maxAge: cookie.maxAge }),
+          });
+        }
+      }
+
       return rep.status(httpResponse.statusCode).send(httpResponse.data);
     });
   }

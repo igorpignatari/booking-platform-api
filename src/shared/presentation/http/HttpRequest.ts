@@ -5,7 +5,9 @@ export interface HttpRequest<TBody = unknown, TParams = unknown, TQuery = unknow
   params: TParams;
   query: TQuery;
   headers?: Record<string, string | string[] | undefined>;
-  cookies?: Record<string, string>;
+  cookies?: {
+    refreshToken?: string;
+  };
 
   correlationId: string;
   logger: ILogger;
