@@ -9,6 +9,16 @@ import { JWTServicesImpl } from "@contexts/auth/infra/jwt/JWTServicesImpl";
 import { Result } from "@core/result/Result";
 import { DBError } from "@shared/infra/errors/DBError";
 
+// ---------------------------------------------------------------------------
+// Helper — generates a real signed refreshToken JWT for a given RefreshToken
+// ---------------------------------------------------------------------------
+
+const jwtService = new JWTServicesImpl();
+
+function makeRefreshTokenJwt(refreshTokenId: string, userId: string): string {
+  return jwtService.generateRefreshToken({ sub: userId, jti: refreshTokenId });
+}
+
 describe("RefreshTokenUseCase", () => {
   describe("success", () => {
     it("should return new accessToken and refreshToken", async () => {
@@ -16,6 +26,7 @@ describe("RefreshTokenUseCase", () => {
       const { useCase, authRepository, authUserRepository } = makeRefreshTokenUseCase();
       const refreshToken = makeRefreshToken();
       const user = makeAuthUser({ id: refreshToken.userId });
+      const refreshTokenJwt = makeRefreshTokenJwt(refreshToken.id, refreshToken.userId);
 
       await authRepository.save(refreshToken);
       authUserRepository.users.push({
@@ -30,7 +41,7 @@ describe("RefreshTokenUseCase", () => {
       });
 
       // Act
-      const result = await useCase.execute({ jti: refreshToken.id });
+      const result = await useCase.execute({ refreshToken: refreshTokenJwt });
 
       // Assert
       expect(result.isOk).toBe(true);
@@ -43,6 +54,7 @@ describe("RefreshTokenUseCase", () => {
       const { useCase, authRepository, authUserRepository } = makeRefreshTokenUseCase();
       const refreshToken = makeRefreshToken();
       const user = makeAuthUser({ id: refreshToken.userId });
+      const refreshTokenJwt = makeRefreshTokenJwt(refreshToken.id, refreshToken.userId);
 
       await authRepository.save(refreshToken);
       authUserRepository.users.push({
@@ -57,7 +69,7 @@ describe("RefreshTokenUseCase", () => {
       });
 
       // Act
-      await useCase.execute({ jti: refreshToken.id });
+      await useCase.execute({ refreshToken: refreshTokenJwt });
 
       // Assert — old token must be revoked
       const old = await authRepository.findByJti(refreshToken.id);
@@ -66,12 +78,12 @@ describe("RefreshTokenUseCase", () => {
   });
 
   describe("failure", () => {
-    it("should return error when token is not found", async () => {
+    it("should return error when JWT signature is invalid", async () => {
       // Arrange
       const { useCase } = makeRefreshTokenUseCase();
 
       // Act
-      const result = await useCase.execute({ jti: "non-existent-jti" });
+      const result = await useCase.execute({ refreshToken: "invalid.jwt.token" });
 
       // Assert
       expect(result.isErr).toBe(true);
@@ -83,11 +95,12 @@ describe("RefreshTokenUseCase", () => {
       const expiredToken = makeRefreshToken({
         expiresAt: new Date(Date.now() - 1000 * 60 * 60 * 7),
       });
+      const refreshTokenJwt = makeRefreshTokenJwt(expiredToken.id, expiredToken.userId);
 
       await authRepository.save(expiredToken);
 
       // Act
-      const result = await useCase.execute({ jti: expiredToken.id });
+      const result = await useCase.execute({ refreshToken: refreshTokenJwt });
 
       // Assert
       expect(result.isErr).toBe(true);
@@ -97,11 +110,25 @@ describe("RefreshTokenUseCase", () => {
       // Arrange
       const { useCase, authRepository } = makeRefreshTokenUseCase();
       const refreshToken = makeRefreshToken();
+      const refreshTokenJwt = makeRefreshTokenJwt(refreshToken.id, refreshToken.userId);
+
       await authRepository.save(refreshToken);
       await authRepository.revoke(refreshToken.id);
 
       // Act
-      const result = await useCase.execute({ jti: refreshToken.id });
+      const result = await useCase.execute({ refreshToken: refreshTokenJwt });
+
+      // Assert
+      expect(result.isErr).toBe(true);
+    });
+
+    it("should return error when token jti does not exist in repository", async () => {
+      // Arrange
+      const { useCase } = makeRefreshTokenUseCase();
+      const refreshTokenJwt = makeRefreshTokenJwt(crypto.randomUUID(), crypto.randomUUID());
+
+      // Act
+      const result = await useCase.execute({ refreshToken: refreshTokenJwt });
 
       // Assert
       expect(result.isErr).toBe(true);
@@ -110,12 +137,14 @@ describe("RefreshTokenUseCase", () => {
     it("should return error when user is not found", async () => {
       // Arrange
       const { useCase, authRepository } = makeRefreshTokenUseCase();
-      // Save token but do NOT add a matching user in authUserRepository
-      const refreshToken = makeRefreshToken({ userId: "ghost-user-id" });
+      const refreshToken = makeRefreshToken();
+      const refreshTokenJwt = makeRefreshTokenJwt(refreshToken.id, refreshToken.userId);
+
       await authRepository.save(refreshToken);
+      // user NOT added to authUserRepository
 
       // Act
-      const result = await useCase.execute({ jti: refreshToken.id });
+      const result = await useCase.execute({ refreshToken: refreshTokenJwt });
 
       // Assert
       expect(result.isErr).toBe(true);
@@ -128,14 +157,12 @@ describe("RefreshTokenUseCase", () => {
 
       authRepository.findByJti.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
-      const useCase = new RefreshTokenUseCase(
-        authUserRepository,
-        authRepository,
-        new JWTServicesImpl(),
-      );
+      const useCase = new RefreshTokenUseCase(authUserRepository, authRepository, jwtService);
+
+      const refreshTokenJwt = makeRefreshTokenJwt(crypto.randomUUID(), crypto.randomUUID());
 
       // Act
-      const result = await useCase.execute({ jti: "any-jti" });
+      const result = await useCase.execute({ refreshToken: refreshTokenJwt });
 
       // Assert
       expect(result.isErr).toBe(true);
@@ -146,6 +173,7 @@ describe("RefreshTokenUseCase", () => {
       const authRepository = makeMockAuthRepository();
       const authUserRepository = makeMockAuthUserRepository();
       const refreshToken = makeRefreshToken();
+      const refreshTokenJwt = makeRefreshTokenJwt(refreshToken.id, refreshToken.userId);
 
       authRepository.findByJti.mockResolvedValue(Result.ok(refreshToken));
       authUserRepository.findByUserIdForAuth.mockResolvedValue(
@@ -160,14 +188,10 @@ describe("RefreshTokenUseCase", () => {
       );
       authRepository.revoke.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
-      const useCase = new RefreshTokenUseCase(
-        authUserRepository,
-        authRepository,
-        new JWTServicesImpl(),
-      );
+      const useCase = new RefreshTokenUseCase(authUserRepository, authRepository, jwtService);
 
       // Act
-      const result = await useCase.execute({ jti: refreshToken.id });
+      const result = await useCase.execute({ refreshToken: refreshTokenJwt });
 
       // Assert
       expect(result.isErr).toBe(true);
@@ -178,6 +202,7 @@ describe("RefreshTokenUseCase", () => {
       const authRepository = makeMockAuthRepository();
       const authUserRepository = makeMockAuthUserRepository();
       const refreshToken = makeRefreshToken();
+      const refreshTokenJwt = makeRefreshTokenJwt(refreshToken.id, refreshToken.userId);
 
       authRepository.findByJti.mockResolvedValue(Result.ok(refreshToken));
       authUserRepository.findByUserIdForAuth.mockResolvedValue(
@@ -193,14 +218,10 @@ describe("RefreshTokenUseCase", () => {
       authRepository.revoke.mockResolvedValue(Result.ok(undefined));
       authRepository.save.mockResolvedValue(Result.err(DBError.create("Internal error")));
 
-      const useCase = new RefreshTokenUseCase(
-        authUserRepository,
-        authRepository,
-        new JWTServicesImpl(),
-      );
+      const useCase = new RefreshTokenUseCase(authUserRepository, authRepository, jwtService);
 
       // Act
-      const result = await useCase.execute({ jti: refreshToken.id });
+      const result = await useCase.execute({ refreshToken: refreshTokenJwt });
 
       // Assert
       expect(result.isErr).toBe(true);
@@ -211,20 +232,17 @@ describe("RefreshTokenUseCase", () => {
       const authRepository = makeMockAuthRepository();
       const authUserRepository = makeMockAuthUserRepository();
       const refreshToken = makeRefreshToken();
+      const refreshTokenJwt = makeRefreshTokenJwt(refreshToken.id, refreshToken.userId);
 
       authRepository.findByJti.mockResolvedValue(Result.ok(refreshToken));
       authUserRepository.findByUserIdForAuth.mockResolvedValue(
         Result.err(DBError.create("Internal error")),
       );
 
-      const useCase = new RefreshTokenUseCase(
-        authUserRepository,
-        authRepository,
-        new JWTServicesImpl(),
-      );
+      const useCase = new RefreshTokenUseCase(authUserRepository, authRepository, jwtService);
 
       // Act
-      const result = await useCase.execute({ jti: refreshToken.id });
+      const result = await useCase.execute({ refreshToken: refreshTokenJwt });
 
       // Assert
       expect(result.isErr).toBe(true);

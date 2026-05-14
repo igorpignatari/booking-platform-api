@@ -22,6 +22,7 @@ let loginUseCase: LoginUseCase;
 let refreshTokenUseCase: RefreshTokenUseCase;
 let userEmail: string;
 const RAW_PASSWORD = "plaintext_password";
+const jwtService = new JWTServicesImpl();
 
 beforeAll(async () => {
   testDb = await createTestDatabase();
@@ -30,7 +31,6 @@ beforeAll(async () => {
   const authUserDAO = new AuthUserDAO(testDb.db);
   const authRepository = new AuthRepositoryImpl(authDAO);
   const authUserRepository = new AuthUserRepositoryImpl(authUserDAO);
-  const jwtService = new JWTServicesImpl();
   const hasher = new HashInMemory();
 
   loginUseCase = new LoginUseCase(authRepository, authUserRepository, jwtService, hasher);
@@ -51,16 +51,16 @@ beforeEach(async () => {
 });
 
 // ---------------------------------------------------------------------------
-// Helper — login and extract jti from the refresh token
+// Helper — login and return the refresh token JWT and its jti
 // ---------------------------------------------------------------------------
 
-async function loginAndGetJti(): Promise<string> {
-  const loginResult = await loginUseCase.execute({ email: userEmail, password: RAW_PASSWORD });
-  if (loginResult.isErr) throw new Error("Login failed in test helper");
+async function loginAndGetTokens(): Promise<{ refreshToken: string; jti: string }> {
+  const result = await loginUseCase.execute({ email: userEmail, password: RAW_PASSWORD });
+  if (result.isErr) throw new Error("Login failed in test helper");
 
-  const jwtService = new JWTServicesImpl();
-  const payload = jwtService.verifyRefreshToken(loginResult.value.refreshToken);
-  return payload.jti;
+  const refreshToken = result.value.refreshToken;
+  const { jti } = jwtService.verifyRefreshToken(refreshToken);
+  return { refreshToken, jti };
 }
 
 // ---------------------------------------------------------------------------
@@ -71,10 +71,10 @@ describe("RefreshTokenUseCase (integration)", () => {
   describe("success", () => {
     it("should return a new accessToken and refreshToken", async () => {
       // Arrange
-      const jti = await loginAndGetJti();
+      const { refreshToken } = await loginAndGetTokens();
 
       // Act
-      const result = await refreshTokenUseCase.execute({ jti });
+      const result = await refreshTokenUseCase.execute({ refreshToken });
 
       // Assert
       expect(result.isOk).toBe(true);
@@ -84,10 +84,10 @@ describe("RefreshTokenUseCase (integration)", () => {
 
     it("should revoke the old token and create a new one in the database", async () => {
       // Arrange
-      const jti = await loginAndGetJti();
+      const { refreshToken, jti } = await loginAndGetTokens();
 
       // Act
-      await refreshTokenUseCase.execute({ jti });
+      await refreshTokenUseCase.execute({ refreshToken });
 
       // Assert — old token revoked
       const oldRow = await testDb.db.oneOrNone<{ revoked_at: string | null }>(
@@ -105,27 +105,25 @@ describe("RefreshTokenUseCase (integration)", () => {
   });
 
   describe("failure", () => {
-    it("should return error when jti does not exist", async () => {
+    it("should return error when JWT signature is invalid", async () => {
       // Act
-      const result = await refreshTokenUseCase.execute({ jti: crypto.randomUUID() });
+      const result = await refreshTokenUseCase.execute({ refreshToken: "invalid.jwt.token" });
 
       // Assert
       expect(result.isErr).toBe(true);
     });
 
-    it("should return error when token is expired", async () => {
-      // Arrange — save an already-expired token directly
-      const jti = crypto.randomUUID();
-      const userId = (await testDb.db.oneOrNone<{ id: string }>("SELECT id FROM users LIMIT 1"))
-        ?.id;
+    it("should return error when token is expired in the database", async () => {
+      // Arrange — login to get a valid JWT, then override the DB row to be expired
+      const { refreshToken, jti } = await loginAndGetTokens();
 
-      await testDb.db.none(
-        "INSERT INTO auth (jti, user_id, created_at, expires_at) VALUES ($1, $2, NOW(), $3)",
-        [jti, userId, new Date(Date.now() - 1000)],
-      );
+      await testDb.db.none("UPDATE auth SET expires_at = $1 WHERE jti = $2", [
+        new Date(Date.now() - 1000),
+        jti,
+      ]);
 
       // Act
-      const result = await refreshTokenUseCase.execute({ jti });
+      const result = await refreshTokenUseCase.execute({ refreshToken });
 
       // Assert
       expect(result.isErr).toBe(true);
@@ -133,11 +131,11 @@ describe("RefreshTokenUseCase (integration)", () => {
 
     it("should return error when token is already revoked", async () => {
       // Arrange
-      const jti = await loginAndGetJti();
-      await refreshTokenUseCase.execute({ jti }); // first use revokes it
+      const { refreshToken } = await loginAndGetTokens();
+      await refreshTokenUseCase.execute({ refreshToken }); // first use revokes it
 
       // Act — try to use the already-revoked token
-      const result = await refreshTokenUseCase.execute({ jti });
+      const result = await refreshTokenUseCase.execute({ refreshToken });
 
       // Assert
       expect(result.isErr).toBe(true);

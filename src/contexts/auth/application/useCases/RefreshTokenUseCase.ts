@@ -4,6 +4,7 @@ import { AuthErrors } from "@contexts/auth/domain/errors/AuthErrors";
 import type { TRefreshToken } from "@contexts/auth/domain/types/TRefreshToken";
 import type { UserRole } from "@contexts/auth/infra/database/types/UserRole";
 import { Result } from "@core/result/Result";
+import { tryCatch } from "@core/tryCatch/tryCatch";
 import { env } from "@shared/env/env";
 import { parseDuration } from "@shared/utils/parseDuration";
 import type { AuthResponse } from "../DTOs/AuthResponseDTO";
@@ -19,8 +20,17 @@ export class RefreshTokenUseCase implements IRefreshToken {
     private readonly jwtService: JWTServices,
   ) {}
 
-  async execute({ jti }: RefreshTokenRequest): Promise<Result<AuthResponse>> {
-    const token = await this.authRepository.findByJti(jti);
+  async execute({ refreshToken }: RefreshTokenRequest): Promise<Result<AuthResponse>> {
+    const payload = tryCatch(
+      () => this.jwtService.verifyRefreshToken(refreshToken),
+      (_error) => AuthErrors.USER_UNAUTHORIZED_ERROR.create("Token is invalid"),
+    );
+
+    if (payload.isErr) {
+      return Result.err(payload.error);
+    }
+
+    const token = await this.authRepository.findByJti(payload.value.jti);
 
     if (token.isErr) {
       return Result.err(token.error);
@@ -38,7 +48,7 @@ export class RefreshTokenUseCase implements IRefreshToken {
       return Result.err(AuthErrors.USER_UNAUTHORIZED_ERROR.create("Token is revoked"));
     }
 
-    const user = await this.authUserRepository.findByUserIdForAuth(token.value.userId);
+    const user = await this.authUserRepository.findByUserIdForAuth(payload.value.sub);
 
     if (user.isErr) {
       return Result.err(user.error);
@@ -48,7 +58,7 @@ export class RefreshTokenUseCase implements IRefreshToken {
       return Result.err(AuthErrors.USER_UNAUTHORIZED_ERROR.create("User not found"));
     }
 
-    const isRevoked = await this.authRepository.revoke(jti);
+    const isRevoked = await this.authRepository.revoke(payload.value.jti);
 
     if (isRevoked.isErr) {
       return Result.err(isRevoked.error);
@@ -56,15 +66,15 @@ export class RefreshTokenUseCase implements IRefreshToken {
 
     const expiresAt = new Date(Date.now() + parseDuration(env.jwtRefreshExpiresIn));
 
-    const newRefreshTokenData: TRefreshToken = {
+    const refreshTokenData: TRefreshToken = {
       id: crypto.randomUUID(),
       userId: token.value.userId,
       expiresAt,
     };
 
-    const newRefreshToken = RefreshToken.create(newRefreshTokenData);
+    const refreshTokenEntity = RefreshToken.create(refreshTokenData);
 
-    const isSave = await this.authRepository.save(newRefreshToken);
+    const isSave = await this.authRepository.save(refreshTokenEntity);
 
     if (isSave.isErr) {
       return Result.err(isSave.error);
@@ -75,14 +85,14 @@ export class RefreshTokenUseCase implements IRefreshToken {
       role: user.value.role as UserRole,
     });
 
-    const refreshToken = this.jwtService.generateRefreshToken({
+    const newRefreshToken = this.jwtService.generateRefreshToken({
       sub: token.value.userId,
-      jti: newRefreshToken.id,
+      jti: refreshTokenEntity.id,
     });
 
     return Result.ok({
       accessToken,
-      refreshToken,
+      refreshToken: newRefreshToken,
     });
   }
 }
