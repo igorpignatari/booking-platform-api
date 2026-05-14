@@ -53,7 +53,6 @@ describe("POST /users (e2e)", () => {
       });
 
       // Assert — HTTP
-      console.log(res);
       expect(res.statusCode).toBe(201);
 
       // Assert — body (CreateUserViewModel)
