@@ -27,6 +27,15 @@ test-watch:
 test-coverage:
 	npm run test:coverage
 
+test-all:
+	sudo docker compose -f docker-compose.test.yml up -d
+	npx jest && npx jest --config jest.integration.config.ts
+	sudo docker compose -f docker-compose.test.yml down
+	sudo docker compose -f docker-compose.test.yml up -d
+	npx jest --config jest.e2e.config.js
+	sudo docker compose -f docker-compose.test.yml down
+
+
 # ── Code Quality ───────────────────────────────────────────────────────────────
 lint:
 	npm run lint
