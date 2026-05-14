@@ -22,7 +22,7 @@ export class LoginController extends BaseController {
           name: "refreshToken",
           value: data.refreshToken,
           httpOnly: true,
-          secure: true,
+          secure: env.nodeEnv === "production",
           sameSite: "strict",
           maxAge: parseDuration(env.jwtRefreshExpiresIn),
         }),

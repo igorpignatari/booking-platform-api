@@ -1,5 +1,5 @@
-import type { RefreshTokenRequest } from "@contexts/auth/application/DTOs/RefreshTokenDTO";
 import type { IRefreshToken } from "@contexts/auth/application/ports/input/IRefreshToken";
+import { AuthErrors } from "@contexts/auth/domain/errors/AuthErrors";
 import { env } from "@shared/env/env";
 import { BaseController } from "@shared/presentation/http/BaseController";
 import type { HttpRequest } from "@shared/presentation/http/HttpRequest";
@@ -10,11 +10,15 @@ export class RefreshTokenController extends BaseController {
   constructor(private readonly refreshTokenUseCase: IRefreshToken) {
     super();
   }
-  protected override async execute(
-    httpRequest: HttpRequest<RefreshTokenRequest>,
-  ): Promise<HttpResponse> {
+  protected override async execute(httpRequest: HttpRequest): Promise<HttpResponse> {
     httpRequest.logger.info("RefreshTokenController");
-    const result = await this.refreshTokenUseCase.execute(httpRequest.body);
+    const token = httpRequest.cookies?.refreshToken;
+
+    if (!token) {
+      return this.fail(AuthErrors.USER_UNAUTHORIZED_ERROR.create("Refresh token not found"));
+    }
+
+    const result = await this.refreshTokenUseCase.execute({ refreshToken: token });
 
     return result.fold(
       (data) =>

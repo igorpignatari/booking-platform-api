@@ -30,7 +30,6 @@ describe("Login controller", () => {
           name: "refreshToken",
           value: "refresh-token",
           httpOnly: true,
-          secure: true,
         }),
       ]);
     });
